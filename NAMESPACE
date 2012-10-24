@@ -1,0 +1,2 @@
+useDynLib(gaga)
+exportPattern("^[[:alpha:]]+")

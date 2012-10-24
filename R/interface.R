@@ -1,0 +1,29 @@
+load_recapture_data <- function(times_of_surveys, times_of_recaptures) {
+	if ( !is.vector(times_of_surveys) || !is.integer(as.integer(times_of_surveys))) {
+		stop("Times of surveys must be convertible to a vector of integers.")	
+	}
+	if ( !is.list(times_of_recaptures) || !all(sapply(times_of_recaptures, is.vector)) ||
+			 !all(sapply(times_of_recaptures, function(x) {is.integer(as.integer(x))}))
+	) {
+		stop("Times of recaptures must be a list of vectors of integers.")
+	}
+	x <- list(
+		times_of_surveys = as.integer(times_of_surveys),
+		times_of_recaptures = lapply(times_of_recaptures, as.integer)
+	)
+	ptr <- .Call("load_recapture_data", x=x, PACKAGE="gaga")
+	return(ptr)
+}
+
+get_N <- function(ptr) {
+	N <- .Call("get_N", xp=xp, PACKAGE="gaga")
+	return(N)
+}
+
+get_K <- function(ptr) {
+	K <- .Call("get_K", xp=xp, PACKAGE="gaga")
+	return(K)
+}
+
+
+
