@@ -1,5 +1,6 @@
 #include "interface.hpp"
 #include <survival.hpp>
+#include <RcppArmadillo.h>
 
 
 RcppExport SEXP load_recapture_data(SEXP x) {
@@ -39,4 +40,20 @@ RcppExport SEXP get_K(SEXP xp) {
 	return Rcpp::wrap(K);
 }
 
+
+RcppExport SEXP get_recaptures(SEXP xp, SEXP id) {
+	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
+	int i = Rcpp::as<int>(id); 	
+	arma::Row<int> recaptures(R_data_ptr->get_K());
+	recaptures = R_data_ptr->get_recaptures(i);
+	return Rcpp::wrap(recaptures);
+}
+
+
+RcppExport SEXP get_surveys(SEXP xp) {
+	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
+	arma::Row<int> surveys;
+	surveys = R_data_ptr->get_surveys();
+	return Rcpp::wrap(surveys);
+}
 

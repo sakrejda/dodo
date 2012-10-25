@@ -9,4 +9,4 @@ Description: Interface code to load data, as well as initialize and
 	test algorithms and store/process output.
 License: GPL
 Depends: Rcpp (>= 0.9.10)
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo

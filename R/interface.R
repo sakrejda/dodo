@@ -7,9 +7,11 @@ load_recapture_data <- function(times_of_surveys, times_of_recaptures) {
 	) {
 		stop("Times of recaptures must be a list of vectors of integers.")
 	}
-	x <- list(
-		times_of_surveys = as.integer(times_of_surveys),
-		times_of_recaptures = lapply(times_of_recaptures, as.integer)
+	x <- list(  ## "-1" shifts to C/C++ indexing.
+		times_of_surveys = as.integer(times_of_surveys) - 1, 
+		times_of_recaptures = lapply(
+			X = times_of_recaptures, 
+			FUN = function(x) { return(as.integer(x) - 1) } )
 	)
 	ptr <- .Call("load_recapture_data", x=x, PACKAGE="gaga")
 	return(ptr)
@@ -25,5 +27,24 @@ get_K <- function(ptr) {
 	return(K)
 }
 
+get_recaptures <- function(ptr, id) {
+	if (!is.numeric(id) || (length(id) != 1) || 
+			!is.integer(as.integer(id))) 
+	{ 
+		stop("Argument 'id' should be a numeric vector of length 1.")
+	}
+	if (id < 1) {
+		stop("Argument 'id' should be a positive integer.")
+	}
+	N <- get_N(ptr)
+	id <- as.integer(id)
+	if (id > N) stop(cat("There are only ", N, " individuals.\n", sep=''))
+	if (id < 1) stop(cat("The first id is '1'.\n", sep=''))
+	id <- id - 1 ## "-1" shifts to C/C++ indexing.
+	recaptures <- .Call("get_recaptures", xp=xp, id=id)
+	return(recaptures)  
+}
 
-
+get_surveys <- function(ptr) {
+	surveys <- .Call("get_surveys", xp=xp)
+	return(surveys + 1 ) ## "+1" shifts to R indexing.
