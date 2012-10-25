@@ -1,2 +1,3 @@
 useDynLib(gaga)
 exportPattern("^[[:alpha:]]+")
+exportPattern("^[^\\.]")
