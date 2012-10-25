@@ -48,3 +48,4 @@ get_recaptures <- function(ptr, id) {
 get_surveys <- function(ptr) {
 	surveys <- .Call("get_surveys", xp=xp)
 	return(surveys + 1 ) ## "+1" shifts to R indexing.
+}

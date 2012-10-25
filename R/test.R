@@ -53,8 +53,6 @@ load_get_surveys <- function(times_of_surveys, times_of_recaptures) {
 }
 
 
-}
-
 load_get_compare_recaptures <- function(times_of_surveys, times_of_recaptures) {
 	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
 	recaps <- list()
