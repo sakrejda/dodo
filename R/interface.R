@@ -18,12 +18,12 @@ load_recapture_data <- function(times_of_surveys, times_of_recaptures) {
 }
 
 get_N <- function(ptr) {
-	N <- .Call("get_N", xp=xp, PACKAGE="gaga")
+	N <- .Call("get_N", ptr=ptr, PACKAGE="gaga")
 	return(N)
 }
 
 get_K <- function(ptr) {
-	K <- .Call("get_K", xp=xp, PACKAGE="gaga")
+	K <- .Call("get_K", ptr=ptr, PACKAGE="gaga")
 	return(K)
 }
 
@@ -41,11 +41,43 @@ get_recaptures <- function(ptr, id) {
 	if (id > N) stop(cat("There are only ", N, " individuals.\n", sep=''))
 	if (id < 1) stop(cat("The first id is '1'.\n", sep=''))
 	id <- id - 1 ## "-1" shifts to C/C++ indexing.
-	recaptures <- .Call("get_recaptures", xp=xp, id=id)
+	recaptures <- .Call("get_recaptures", ptr=ptr, id=id)
 	return(recaptures)  
 }
 
+get_recaptures_matrix <- function(ptr) { 
+	recaptures_matrix <- matrix(data=NA, nrow=get_N(ptr), ncol=get_K(ptr))
+	for ( i in 1:get_N(ptr)) {
+		recaptures_matrix[i,] <- as.vector(get_recaptures(ptr, i))
+	}
+	return(recaptures_matrix)
+}
+
 get_surveys <- function(ptr) {
-	surveys <- .Call("get_surveys", xp=xp)
+	surveys <- .Call("get_surveys", ptr=ptr)
 	return(surveys + 1 ) ## "+1" shifts to R indexing.
 }
+
+get_births <- function(ptr) {
+	births <- .Call("get_births", ptr=ptr)
+	return(births + 1 ) ## "+1" shifts to R indexing.
+}
+
+get_first_obs <- function(ptr) {
+	first_obs <- .Call("get_first_obs", ptr=ptr)
+	return(first_obs + 1 ) ## "+1" shifts to R indexing.
+}
+
+get_last_obs <- function(ptr) {
+	last_obs <- .Call("get_last_obs", ptr=ptr)
+	return(last_obs + 1 ) ## "+1" shifts to R indexing.
+}
+
+### STATE or children only:
+get_deaths <- function(ptr) {
+	deaths <- .Call("get_deaths", ptr=ptr)
+	return(deaths + 1 ) ## "+1" shifts to R indexing.
+}
+
+
+

@@ -57,3 +57,32 @@ RcppExport SEXP get_surveys(SEXP xp) {
 	return Rcpp::wrap(surveys);
 }
 
+RcppExport SEXP get_births(SEXP xp) {
+	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
+	arma::Row<int> births;
+	births = R_data_ptr->get_births();
+	return Rcpp::wrap(births);
+}
+
+
+RcppExport SEXP get_first_obs(SEXP xp) {
+	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
+	arma::Row<int> first_obs;
+	first_obs = R_data_ptr->get_first_obs();
+	return Rcpp::wrap(first_obs);
+}
+
+RcppExport SEXP get_last_obs(SEXP xp) {
+	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
+	arma::Row<int> last_obs;
+	last_obs = R_data_ptr->get_last_obs();
+	return Rcpp::wrap(last_obs);
+}
+
+
+
+
+
+
+
+

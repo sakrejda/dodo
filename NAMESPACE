@@ -3,7 +3,3 @@ exportPattern("^[[:alpha:]]+")
 exportPattern("^[^\\.]")
 
 
-#export(load_get_K)
-#export(load_get_N)
-#export(load_get_surveys)
-#export(load_get_compare_recaptures)
