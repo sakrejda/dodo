@@ -1,4 +1,4 @@
-#include "interface.hpp"
+#include "interface-data.hpp"
 #include <survival.hpp>
 #include <RcppArmadillo.h>
 
@@ -20,14 +20,14 @@ RcppExport SEXP load_recapture_data(SEXP x) {
 	return R_data_ptr;
 }
 
-RcppExport SEXP get_N(SEXP xp) {
+RcppExport SEXP get_N_data(SEXP xp) {
 	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
 	int N;
 	N = R_data_ptr->get_N();
 	return Rcpp::wrap(N);
 }
 
-RcppExport SEXP get_K(SEXP xp) {
+RcppExport SEXP get_K_data(SEXP xp) {
 	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
 	int K;
 	K = R_data_ptr->get_K();
@@ -35,7 +35,7 @@ RcppExport SEXP get_K(SEXP xp) {
 }
 
 
-RcppExport SEXP get_recaptures(SEXP xp, SEXP id) {
+RcppExport SEXP get_recaptures_data(SEXP xp, SEXP id) {
 	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
 	int i = Rcpp::as<int>(id); 	
 	arma::Row<int> recaptures(R_data_ptr->get_K());
@@ -44,14 +44,14 @@ RcppExport SEXP get_recaptures(SEXP xp, SEXP id) {
 }
 
 
-RcppExport SEXP get_surveys(SEXP xp) {
+RcppExport SEXP get_surveys_data(SEXP xp) {
 	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
 	arma::Row<int> surveys;
 	surveys = R_data_ptr->get_surveys();
 	return Rcpp::wrap(surveys);
 }
 
-RcppExport SEXP get_births(SEXP xp) {
+RcppExport SEXP get_births_data(SEXP xp) {
 	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
 	arma::Row<int> births;
 	births = R_data_ptr->get_births();
@@ -59,14 +59,14 @@ RcppExport SEXP get_births(SEXP xp) {
 }
 
 
-RcppExport SEXP get_first_obs(SEXP xp) {
+RcppExport SEXP get_first_obs_data(SEXP xp) {
 	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
 	arma::Row<int> first_obs;
 	first_obs = R_data_ptr->get_first_obs();
 	return Rcpp::wrap(first_obs);
 }
 
-RcppExport SEXP get_last_obs(SEXP xp) {
+RcppExport SEXP get_last_obs_data(SEXP xp) {
 	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
 	arma::Row<int> last_obs;
 	last_obs = R_data_ptr->get_last_obs();
