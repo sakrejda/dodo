@@ -13,9 +13,11 @@ RcppExport SEXP load_recapture_state(SEXP x) {
 		i != r_tor.end(); ++i) {
 		tor.push_back(Rcpp::as<std::vector<int> >(*i));
   }
+	std::vector<int> tods = Rcpp::as<std::vector<int> >(rparam["times_of_deaths"]);
+	std::vector<bool> kds = Rcpp::as<std::vector<bool> >(rparam["known_deaths"]);
 
 
-	Recapture_State_FLAT* state_ptr = new Recapture_State_FLAT(tos, tor);
+	Recapture_State_FLAT* state_ptr = new Recapture_State_FLAT(tos, tor, tods, kds);
 	Rcpp::XPtr<Recapture_State_FLAT> R_state_ptr( state_ptr, true );
 	return R_state_ptr;
 }

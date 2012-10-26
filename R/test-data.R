@@ -1,5 +1,5 @@
 load_get_compare_K <- function(times_of_surveys, times_of_recaptures) {
-	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
+	ptr <- data_wrapper(times_of_surveys, times_of_recaptures)
 	K <- max(times_of_surveys)
 	test <- ( K == get_K(ptr))
 	if (!test) {
@@ -18,7 +18,7 @@ load_get_compare_K <- function(times_of_surveys, times_of_recaptures) {
 
 
 load_get_compare_N <- function(times_of_surveys, times_of_recaptures) {
-	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
+	ptr <- data_wrapper(times_of_surveys, times_of_recaptures)
 	N <- length(times_of_recaptures)
 	test <- ( N == get_N(ptr))
 	if (!test) {
@@ -36,7 +36,7 @@ load_get_compare_N <- function(times_of_surveys, times_of_recaptures) {
 }
 
 load_get_compare_surveys <- function(times_of_surveys, times_of_recaptures) {
-	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
+	ptr <- data_wrapper(times_of_surveys, times_of_recaptures)
 	tos <- get_surveys(ptr)
 	test <- all(tos == times_of_surveys)
 	if (!test) {
@@ -55,7 +55,7 @@ load_get_compare_surveys <- function(times_of_surveys, times_of_recaptures) {
 
 
 load_get_compare_births <- function(times_of_surveys, times_of_recaptures) {
-	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
+	ptr <- data_wrapper(times_of_surveys, times_of_recaptures)
 	original_births <- sapply( times_of_recaptures, min )
 	returned_births <- as.vector(get_births(ptr))
 	test <- all(original_births == returned_births)
@@ -74,7 +74,7 @@ load_get_compare_births <- function(times_of_surveys, times_of_recaptures) {
 }
 
 load_get_compare_first_obs <- function(times_of_surveys, times_of_recaptures) {
-	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
+	ptr <- data_wrapper(times_of_surveys, times_of_recaptures)
 	original_first_obs <- sapply( times_of_recaptures, min )
 	returned_first_obs <- as.vector(get_first_obs(ptr))
 	test <- all(original_first_obs == returned_first_obs)
@@ -93,7 +93,7 @@ load_get_compare_first_obs <- function(times_of_surveys, times_of_recaptures) {
 }
 
 load_get_compare_last_obs <- function(times_of_surveys, times_of_recaptures) {
-	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
+	ptr <- data_wrapper(times_of_surveys, times_of_recaptures)
 	original_last_obs <- sapply( times_of_recaptures, max )
 	returned_last_obs <- as.vector(get_last_obs(ptr))
 	test <- all(original_last_obs == returned_last_obs)
@@ -112,7 +112,7 @@ load_get_compare_last_obs <- function(times_of_surveys, times_of_recaptures) {
 }
 
 load_get_compare_recaptures <- function(times_of_surveys, times_of_recaptures) {
-	ptr <- load_recapture_data(times_of_surveys, times_of_recaptures)
+	ptr <- data_wrapper(times_of_surveys, times_of_recaptures)
 	recaps <- list()
 	w_recaps <- list()
 	for ( i in 1:length(times_of_recaptures)) {
