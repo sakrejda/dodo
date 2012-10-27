@@ -105,45 +105,45 @@ setMethod(
 
 setMethod(
 	f = "get_surveys",
-	signature = signature(.Object = "stage_wrapper"),
+	signature = signature(.Object = "state_wrapper"),
 	definition = function(.Object) {
-		surveys <- .Call("get_surveys_stage", xp=.Object@pointer, PACKAGE="gaga")
+		surveys <- .Call("get_surveys_state", xp=.Object@pointer, PACKAGE="gaga")
 		return(surveys + 1 ) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_births",
-	signature = signature(.Object = "stage_wrapper"),
+	signature = signature(.Object = "state_wrapper"),
 	definition = function(.Object) {
-		births <- .Call("get_births_stage", xp=.Object@pointer, PACKAGE="gaga")
+		births <- .Call("get_births_state", xp=.Object@pointer, PACKAGE="gaga")
 		return(births + 1) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_first_obs",
-	signature = signature(.Object = "stage_wrapper"),
+	signature = signature(.Object = "state_wrapper"),
 	definition = function(.Object) {
-		first_obs <- .Call("get_first_obs_stage", xp=.Object@pointer, PACKAGE="gaga")
+		first_obs <- .Call("get_first_obs_state", xp=.Object@pointer, PACKAGE="gaga")
 		return(first_obs + 1) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_last_obs",
-	signature = signature(.Object = "stage_wrapper"),
+	signature = signature(.Object = "state_wrapper"),
 	definition = function(.Object) {
-		last_obs <- .Call("get_last_obs_stage", xp=.Object@pointer, PACKAGE="gaga")
+		last_obs <- .Call("get_last_obs_state", xp=.Object@pointer, PACKAGE="gaga")
 		return(last_obs + 1) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_deaths",
-	signature = signature(.Object = "stage_wrapper"),
+	signature = signature(.Object = "state_wrapper"),
 	definition = function(.Object) {
-		deaths <- .Call("get_deaths_stage", xp=.Object@pointer, PACKAGE="gaga")
+		deaths <- .Call("get_deaths_state", xp=.Object@pointer, PACKAGE="gaga")
 		return(deaths + 1) ## "+1" shifts to R indexing.
 	}
 )
