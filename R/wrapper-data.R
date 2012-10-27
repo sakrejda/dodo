@@ -34,8 +34,8 @@ setMethod(
   	) {
     	stop("Times of recaptures must be a list of vectors of integers.")
   	}
-		.Object@times_of_surveys
-		.Object@times_of_recaptures
+		.Object@times_of_surveys = times_of_surveys
+		.Object@times_of_recaptures = times_of_recaptures
   	x <- list(  ## "-1" shifts to C/C++ indexing.
     	times_of_surveys = as.integer(times_of_surveys) - 1,
     	times_of_recaptures = lapply(
