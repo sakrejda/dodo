@@ -6,11 +6,11 @@ setMethod(
 		test <- ( K == get_K(.Object))
 		if (!test) {
 			fn <- sys.call()[[1]]
-			msg <- cat(
+			msg <- paste(
 				"Function '", fn, "' failed: check occasion counting.\n",
 				"\tOriginal K: ", K, "\n",
 				"\tReturned K: ", get_K(.Object), "\n",
-				"\n"
+				"\n", sep=''
 			)
 			warning(msg)
 			return(.Object)
@@ -28,11 +28,11 @@ setMethod(
 		test <- ( N == get_N(.Object))
 		if (!test) {
 			fn <- sys.call()[[1]]
-			msg <- cat(
+			msg <- paste(
 				"Function '", fn, "' failed: check individual counting.\n",
 				"\tOriginal N: ", N, "\n",
 				"\tReturned N: ", get_N(.Object), "\n",
-				"\n"
+				"\n", sep=''
 			)
 			warning(msg)
 			return(.Object)
@@ -49,11 +49,11 @@ setMethod(
 		test <- all(tos == .Object@times_of_surveys)
 		if (!test) {
 			fn <- sys.call()[[1]]
-			msg <- cat(
+			msg <- paste(
 				"Function '", fn, "' failed: check surveys.\n",
 				"\tOriginal surveys: ", times_of_surveys, "\n",
 				"\tReturned surveys: ", get_surveys(.Object), "\n",
-				"\n"
+				"\n", sep=''
 			)
 			warning(msg)
 			return(.Object)
@@ -71,11 +71,11 @@ setMethod(
 		test <- all(original_births == returned_births)
 		if (!test) {
 			fn <- sys.call()[[1]]
-			msg <- cat(
+			msg <- paste(
 				"Function '", fn, "' failed: check births.\n",
 				"\tOriginal births: ", original_births, "\n",
 				"\tReturned births: ", returned_births, "\n",
-				"\n"
+				"\n", sep=''
 			)
 			warning(msg)
 			return(.Object)
@@ -93,11 +93,11 @@ setMethod(
 		test <- all(original_first_obs == returned_first_obs)
 		if (!test) {
 			fn <- sys.call()[[1]]
-			msg <- cat(
+			msg <- paste(
 				"Function '", fn, "' failed: check first_obs.\n",
 				"\tOriginal first_obs: ", original_first_obs, "\n",
 				"\tReturned first_obs: ", returned_first_obs, "\n",
-				"\n"
+				"\n", sep=''
 			)
 			warning(msg)
 			return(.Object)
@@ -115,11 +115,11 @@ setMethod(
 		test <- all(original_last_obs == returned_last_obs)
 		if (!test) {
 			fn <- sys.call()[[1]]
-			msg <- cat(
+			msg <- paste(
 				"Function '", fn, "' failed: check last_obs.\n",
 				"\tOriginal last_obs: ", original_last_obs, "\n",
 				"\tReturned last_obs: ", returned_last_obs, "\n",
-				"\n"
+				"\n", sep=''
 			)
 			warning(msg)
 			return(.Object)
@@ -140,12 +140,12 @@ setMethod(
 			test <- all(w_recaps[[i]] == .Object@times_of_recaptures[[i]])
 			if (!test) {
 				fn <- sys.call()[[1]]
-				msg <- cat(
+				msg <- paste(
 					"Function '", fn, "' failed: check data loading/unloading.\n",
 					"\tIndividual: ", i, "\n",
 					"\tOriginal recaptures: ", .Object@times_of_recaptures[[i]], "\n",
 					"\tReturned recaptures: ", w_recaps[[i]], "\n",
-					"\n"
+					"\n", sep=''
 				)
 				warning(msg)
 				return(.Object)
