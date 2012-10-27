@@ -134,7 +134,7 @@ setMethod(
 	definition = function(.Object) {
 		recaps <- list()
 		w_recaps <- list()
-		for ( i in 1:length(times_of_recaptures)) {
+		for ( i in 1:length(.Object@times_of_recaptures)) {
 			recaps[[i]] <- get_recaptures(.Object,i) 
 			w_recaps[[i]] <- which(recaps[[i]] == 1)
 			test <- all(w_recaps[[i]] == .Object@times_of_recaptures[[i]])
