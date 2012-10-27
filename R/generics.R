@@ -26,3 +26,30 @@ setGeneric(name="get_last_obs",
 setGeneric(name="get_deaths",
 					 def=function(.Object) standardGeneric("get_deaths"),
 					 valueClass = "numeric")
+
+setGeneric(name="load_get_compare_K",
+					 def=function(.Object) standardGeneric("load_get_compare_K")
+					)
+setGeneric(name="load_get_compare_N",
+					 def=function(.Object) standardGeneric("load_get_compare_N")
+					)
+setGeneric(name="load_get_compare_surveys",
+					 def=function(.Object)
+						 standardGeneric("load_get_compare_surveys")
+					)
+setGeneric(name="load_get_compare_births",
+					 def=function(.Object)
+						 standardGeneric("load_get_compare_births")
+					)
+setGeneric(name="load_get_compare_first_obs",
+					 def=function(.Object)
+						 standardGeneric("load_get_compare_first_obs")
+					)
+setGeneric(name="load_get_compare_last_obs",
+					 def=function(.Object)
+						 standardGeneric("load_get_compare_last_obs")
+					)
+setGeneric(name="load_get_compare_recaptures",
+					 def=function(.Object)
+						 standardGeneric("load_get_compare_recaptures")
+					)
