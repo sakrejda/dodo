@@ -108,7 +108,7 @@ setMethod(
 	signature = signature(.Object = "data_wrapper"),
 	definition = function(.Object) {
 		surveys <- .Call("get_surveys_data", xp=.Object@pointer, PACKAGE="gaga")
-		return(surveys + 1 ) ## "+1" shifts to R indexing.
+		return(as.vector(surveys + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
@@ -117,7 +117,7 @@ setMethod(
 	signature = signature(.Object = "data_wrapper"),
 	definition = function(.Object) {
 		births <- .Call("get_births_data", xp=.Object@pointer, PACKAGE="gaga")
-		return(births + 1) ## "+1" shifts to R indexing.
+		return(as.vector(births + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
@@ -126,7 +126,7 @@ setMethod(
 	signature = signature(.Object = "data_wrapper"),
 	definition = function(.Object) {
 		first_obs <- .Call("get_first_obs_data", xp=.Object@pointer, PACKAGE="gaga")
-		return(first_obs + 1) ## "+1" shifts to R indexing.
+		return(as.vector(first_obs + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
@@ -135,7 +135,7 @@ setMethod(
 	signature = signature(.Object = "data_wrapper"),
 	definition = function(.Object) {
 		last_obs <- .Call("get_last_obs_data", xp=.Object@pointer, PACKAGE="gaga")
-		return(last_obs + 1) ## "+1" shifts to R indexing.
+		return(as.vector(last_obs + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
