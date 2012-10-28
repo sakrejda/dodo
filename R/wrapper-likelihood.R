@@ -1,5 +1,5 @@
-state_wrapper <- setClass(
-	Class = "state_wrapper",
+likelihood_wrapper <- setClass(
+	Class = "likelihood_wrapper",
 	representation = representation(
 		pointer = "externalptr",
 		times_of_surveys = "numeric",
@@ -29,7 +29,7 @@ state_wrapper <- setClass(
 setMethod(
 	f = "initialize",
 	signature = signature(
-		.Object = "state_wrapper"),
+		.Object = "likelihood_wrapper"),
 	definition = function(.Object, 
 		times_of_surveys, times_of_recaptures,
 		times_of_deaths, known_deaths) {
@@ -67,16 +67,16 @@ setMethod(
 			times_of_deaths = as.integer(times_of_deaths) - 1,
 			known_deaths = known_deaths
   	)
-  	.Object@pointer <- .Call("load_recapture_state", x=x, PACKAGE="gaga")
+  	.Object@pointer <- .Call("load_recapture_likelihood", x=x, PACKAGE="gaga")
   	return(.Object)
 	}
 )
 
 setMethod(
 	f = "get_N",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
-		N <- .Call("get_N_state", xp=.Object@pointer, PACKAGE="gaga")
+		N <- .Call("get_N_likelihood", xp=.Object@pointer, PACKAGE="gaga")
 		return(N)
 	}
 )
@@ -84,16 +84,16 @@ setMethod(
 
 setMethod(
 	f = "get_K",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
-		N <- .Call("get_K_state", xp=.Object@pointer, PACKAGE="gaga")
+		N <- .Call("get_K_likelihood", xp=.Object@pointer, PACKAGE="gaga")
 		return(N)
 	}
 )
 
 setMethod(
 	f = "get_recaptures",
-	signature = signature(.Object = "state_wrapper", id = "numeric"),
+	signature = signature(.Object = "likelihood_wrapper", id = "numeric"),
 	definition = function(.Object, id) {
 		if (!is.numeric(id) || (length(id) != 1) || 
 			!is.integer(as.integer(id))) 
@@ -108,7 +108,7 @@ setMethod(
 		if (id > N) stop(cat("There are only ", N, " individuals.\n", sep=''))
 		if (id < 1) stop(cat("The first id is '1'.\n", sep=''))
 		id <- id - 1 ## "-1" shifts to C/C++ indexing.
-		recaptures <- .Call("get_recaptures_state", 
+		recaptures <- .Call("get_recaptures_likelihood", 
 												xp=.Object@pointer, id=id, PACKAGE="gaga")
 		return(as.vector(recaptures))
 	}
@@ -117,7 +117,7 @@ setMethod(
 
 setMethod(
 	f = "get_recaptures_matrix",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) { 
 		recaptures_matrix <- matrix(
 			data=NA, nrow=get_N(.Object), ncol=get_K(.Object))
@@ -130,45 +130,45 @@ setMethod(
 
 setMethod(
 	f = "get_surveys",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
-		surveys <- .Call("get_surveys_state", xp=.Object@pointer, PACKAGE="gaga")
+		surveys <- .Call("get_surveys_likelihood", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(surveys + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_births",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
-		births <- .Call("get_births_state", xp=.Object@pointer, PACKAGE="gaga")
+		births <- .Call("get_births_likelihood", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(births + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_first_obs",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
-		first_obs <- .Call("get_first_obs_state", xp=.Object@pointer, PACKAGE="gaga")
+		first_obs <- .Call("get_first_obs_likelihood", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(first_obs + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_last_obs",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
-		last_obs <- .Call("get_last_obs_state", xp=.Object@pointer, PACKAGE="gaga")
+		last_obs <- .Call("get_last_obs_likelihood", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(last_obs + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_deaths",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
-		deaths <- .Call("get_deaths_state", xp=.Object@pointer, PACKAGE="gaga")
+		deaths <- .Call("get_deaths_likelihood", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(deaths + 1)) ## "+1" shifts to R indexing.
 	}
 )

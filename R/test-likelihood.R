@@ -1,6 +1,6 @@
 setMethod(
 	f = "compare_K",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		K <- max(.Object@times_of_surveys)
 		test <- ( K == get_K(.Object))
@@ -22,7 +22,7 @@ setMethod(
 
 setMethod(
 	f = "compare_N",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		N <- length(.Object@times_of_recaptures)
 		test <- ( N == get_N(.Object))
@@ -43,7 +43,7 @@ setMethod(
 
 setMethod(
 	f = "compare_surveys",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		tos <- get_surveys(.Object)
 		test <- all(tos == .Object@times_of_surveys)
@@ -64,7 +64,7 @@ setMethod(
 
 setMethod(
 	f = "compare_births",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		original_births <- sapply( .Object@times_of_recaptures, min )
 		returned_births <- as.vector(get_births(.Object))
@@ -86,7 +86,7 @@ setMethod(
 
 setMethod(
 	f = "compare_deaths",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		original_deaths <- .Object@times_of_deaths
 		returned_deaths <- as.vector(get_deaths(.Object))
@@ -108,7 +108,7 @@ setMethod(
 
 setMethod(
 	f = "compare_first_obs",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		original_first_obs <- sapply(.Object@times_of_recaptures, min )
 		returned_first_obs <- as.vector(get_first_obs(.Object))
@@ -130,7 +130,7 @@ setMethod(
 
 setMethod(
 	f = "compare_last_obs",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		original_last_obs <- sapply( .Object@times_of_recaptures, max )
 		returned_last_obs <- as.vector(get_last_obs(.Object))
@@ -152,7 +152,7 @@ setMethod(
 
 setMethod(
 	f = "compare_recaptures",
-	signature = signature(.Object = "state_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {
 		recaps <- list()
 		w_recaps <- list()
@@ -163,7 +163,7 @@ setMethod(
 			if (!test) {
 				fn <- sys.call()[[1]]
 				msg <- paste(
-					"Function '", fn, "' failed: check state loading/unloading.\n",
+					"Function '", fn, "' failed: check likelihood loading/unloading.\n",
 					"\tIndividual: ", i, "\n",
 					"\tOriginal recaptures: ", .Object@times_of_recaptures[[i]], "\n",
 					"\tReturned recaptures: ", w_recaps[[i]], "\n",
