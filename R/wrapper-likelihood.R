@@ -165,6 +165,15 @@ setMethod(
 )
 
 setMethod(
+	f = "get_sampled",
+	signature = signature(.Object = "likelihood_wrapper"),
+	definition = function(.Object) {
+		sampled <- .Call("get_sampled_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		return(sampled) 
+	}
+)
+
+setMethod(
 	f = "get_deaths",
 	signature = signature(.Object = "likelihood_wrapper"),
 	definition = function(.Object) {

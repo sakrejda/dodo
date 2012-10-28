@@ -12,6 +12,7 @@ RcppExport SEXP get_surveys_likelihood(SEXP xp);
 RcppExport SEXP get_births_likelihood(SEXP xp);
 RcppExport SEXP get_first_obs_likelihood(SEXP xp);
 RcppExport SEXP get_last_obs_likelihood(SEXP xp);
+RcppExport SEXP get_sampled_likelihood(SEXP xp);
 RcppExport SEXP get_deaths_likelihood(SEXP xp);
 
 RcppExport SEXP get_PHI_likelihood(SEXP xp);

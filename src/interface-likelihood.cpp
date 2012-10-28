@@ -91,6 +91,14 @@ RcppExport SEXP get_last_obs_likelihood(SEXP xp) {
 	END_RCPP
 }
 
+RcppExport SEXP get_sampled_likelihood(SEXP xp) {
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	std::vector<bool> sampled;
+	sampled = R_likelihood_ptr->get_sampled();
+	return Rcpp::wrap(sampled);
+}
+
+
 RcppExport SEXP get_deaths_likelihood(SEXP xp) {
 	BEGIN_RCPP
 	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);

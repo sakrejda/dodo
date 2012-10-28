@@ -75,6 +75,13 @@ RcppExport SEXP get_last_obs_state(SEXP xp) {
 	return Rcpp::wrap(last_obs);
 }
 
+RcppExport SEXP get_sampled_state(SEXP xp) {
+	Rcpp::XPtr<Recapture_State_FLAT> R_state_ptr(xp);
+	std::vector<bool> sampled;
+	sampled = R_state_ptr->get_sampled();
+	return Rcpp::wrap(sampled);
+}
+
 RcppExport SEXP get_deaths_state(SEXP xp) {
 	Rcpp::XPtr<Recapture_State_FLAT> R_state_ptr(xp);
 	arma::Row<int> deaths;
