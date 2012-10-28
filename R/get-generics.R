@@ -28,6 +28,13 @@ setGeneric(name="get_deaths",
 					 def=function(.Object) standardGeneric("get_deaths"),
 					 valueClass = "numeric")
 
+setGeneric(name="get_PHI",
+					 def=function(.Object) standardGeneric("get_PHI"),
+					 valueClass = "matrix")
+setGeneric(name="get_P",
+					 def=function(.Object) standardGeneric("get_P"),
+					 valueClass = "matrix")
+
 setGeneric(name="get_ll_phi_components",
 					 def=function(.Object) standardGeneric("get_ll_phi_components"),
 					 valueClass = "numeric")
