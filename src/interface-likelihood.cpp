@@ -100,8 +100,20 @@ RcppExport SEXP get_deaths_likelihood(SEXP xp) {
 	END_RCPP
 }
 
+RcppExport SEXP get_ll_phi_components_likelihood(SEXP xp) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	arma::Row<int> ll_phi_components;
+	ll_phi_components = R_likelihood_ptr->get_ll_phi_components();
+	return Rcpp::wrap(ll_phi_components);
+	END_RCPP
+}
 
-
-
-
-
+RcppExport SEXP get_ll_p_components_likelihood(SEXP xp) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	arma::Row<int> ll_p_components;
+	ll_p_components = R_likelihood_ptr->get_ll_p_components();
+	return Rcpp::wrap(ll_p_components);
+	END_RCPP
+}

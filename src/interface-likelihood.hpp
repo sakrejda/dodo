@@ -14,4 +14,7 @@ RcppExport SEXP get_first_obs_likelihood(SEXP xp);
 RcppExport SEXP get_last_obs_likelihood(SEXP xp);
 RcppExport SEXP get_deaths_likelihood(SEXP xp);
 
+RcppExport SEXP get_ll_phi_components_likelihood(xp);
+RcppExport SEXP get_ll_p_components_likelihood(xp);
+
 #endif

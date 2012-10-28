@@ -173,9 +173,26 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "get_ll_phi_components",
+	signature = signature(.Object = "likelihood_wrapper"),
+	definition = function(.Object) {
+		ll_phi_components <- .Call("get_ll_phi_components_likelihood", 
+															 xp=.Object@pointer, PACKAGE="gaga")
+		return(as.vector(ll_phi_components))
+	}
+)
 
 
-
+setMethod(
+	f = "get_ll_p_components",
+	signature = signature(.Object = "likelihood_wrapper"),
+	definition = function(.Object) {
+		ll_p_components <- .Call("get_ll_p_components_likelihood", 
+															 xp=.Object@pointer, PACKAGE="gaga")
+		return(as.vector(ll_p_components))
+	}
+)
 
 
 
