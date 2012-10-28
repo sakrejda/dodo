@@ -101,6 +101,8 @@ RcppExport SEXP get_deaths_likelihood(SEXP xp) {
 }
 
 
+
+
 RcppExport SEXP get_PHI_likelihood(SEXP xp) {
 	BEGIN_RCPP
 	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
@@ -118,6 +120,29 @@ RcppExport SEXP get_P_likelihood(SEXP xp) {
 	return Rcpp::wrap(P);
 	END_RCPP
 }
+
+RcppExport SEXP set_PHI_likelihood(SEXP xp, SEXP PHI_) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	arma::Mat<double> PHI = Rcpp::as<arma::Mat<double> >(PHI_);
+	R_likelihood_ptr->set_PHI(PHI);
+	PHI_ = R_likelihood_ptr->get_PHI();
+	return Rcpp::wrap(PHI_);
+	END_RCPP
+}
+
+RcppExport SEXP set_P_likelihood(SEXP xp, SEXP P_) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	arma::Mat<double> P = Rcpp::as<arma::Mat<double> >(P_);
+	R_likelihood_ptr->set_P(P);
+	P_ = R_likelihood_ptr->get_P();
+	return Rcpp::wrap(P_);
+	END_RCPP
+}
+
+
+
 
 RcppExport SEXP get_ll_phi_components_likelihood(SEXP xp) {
 	BEGIN_RCPP

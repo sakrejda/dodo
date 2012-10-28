@@ -16,6 +16,9 @@ RcppExport SEXP get_deaths_likelihood(SEXP xp);
 
 RcppExport SEXP get_PHI_likelihood(SEXP xp);
 RcppExport SEXP get_P_likelihood(SEXP xp);
+RcppExport SEXP set_PHI_likelihood(SEXP xp, SEXP PHI_);
+RcppExport SEXP set_P_likelihood(SEXP xp, SEXP P_);
+
 RcppExport SEXP get_ll_phi_components_likelihood(SEXP xp);
 RcppExport SEXP get_ll_p_components_likelihood(SEXP xp);
 

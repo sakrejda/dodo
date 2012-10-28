@@ -192,6 +192,23 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "set_PHI",
+	signature = signature(.Object = "likelihood_wrapper", PHI = "matrix"),
+	definition = function(.Object, PHI) {
+		PHI_o <- .Call("set_PHI_likelihood", xp=.Object@pointer, PHI_ = PHI, PACKAGE="gaga")
+		return(PHI_o)
+	}
+)
+
+setMethod(
+	f = "set_P",
+	signature = signature(.Object = "likelihood_wrapper", P = "matrix"),
+	definition = function(.Object, P) {
+		P_o <- .Call("set_P_likelihood", xp=.Object@pointer, P_ = P, PACKAGE="gaga")
+		return(P_o)
+	}
+)
 
 setMethod(
 	f = "get_ll_phi_components",
