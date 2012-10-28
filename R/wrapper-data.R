@@ -140,12 +140,11 @@ setMethod(
 )
 
 setMethod(
-	f = "get_deaths",
+	f = "get_sampled",
 	signature = signature(.Object = "data_wrapper"),
 	definition = function(.Object) {
-		warning("Deaths are an unknown state, not held in data.")
-		#deaths <- .Call("get_deaths_data", xp=.Object@pointer, PACKAGE="gaga")
-		#return(deaths + 1) ## "+1" shifts to R indexing.
+		sampled <- .Call("get_sampled_data", xp=.Object@pointer, PACKAGE="gaga")
+		return(sampled) 
 	}
 )
 

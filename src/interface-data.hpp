@@ -12,5 +12,6 @@ RcppExport SEXP get_surveys_data(SEXP xp);
 RcppExport SEXP get_births_data(SEXP xp);
 RcppExport SEXP get_first_obs_data(SEXP xp);
 RcppExport SEXP get_last_obs_data(SEXP xp);
+RcppExport SEXP get_sampled_data(SEXP xp);
 
 #endif

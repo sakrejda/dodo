@@ -73,7 +73,12 @@ RcppExport SEXP get_last_obs_data(SEXP xp) {
 	return Rcpp::wrap(last_obs);
 }
 
-
+RcppExport SEXP get_sampled_data(SEXP xp) {
+	Rcpp::XPtr<Recapture_Data_FLAT> R_data_ptr(xp);
+	std::vector<bool> sampled;
+	sampled = R_data_ptr->get_sampled();
+	return Rcpp::wrap(sampled);
+}
 
 
 
