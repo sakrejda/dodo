@@ -22,5 +22,7 @@ RcppExport SEXP set_P_likelihood(SEXP xp, SEXP P_);
 
 RcppExport SEXP get_ll_phi_components_likelihood(SEXP xp);
 RcppExport SEXP get_ll_p_components_likelihood(SEXP xp);
+RcppExport SEXP get_some_ll_phi_components_likelihood(SEXP xp, SEXP indices);
+RcppExport SEXP get_some_ll_p_components_likelihood(SEXP xp, SEXP indices);
 
 #endif

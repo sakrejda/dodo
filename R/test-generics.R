@@ -31,11 +31,18 @@ setGeneric(name="compare_recaptures",
 					)
 
 setGeneric(name="compare_ll_phi_components",
-					 def=function(.Object)
+					 def=function(.Object, PHI)
 						 standardGeneric("compare_ll_phi_components")
 					)
 setGeneric(name="compare_ll_p_components",
-					 def=function(.Object)
+					 def=function(.Object, P)
 						 standardGeneric("compare_ll_p_components")
 					)
-
+setGeneric(name="compare_ll_phi_getters",
+					 def=function(.Object)
+						 standardGeneric("compare_ll_phi_getters")
+					)
+setGeneric(name="compare_ll_p_getters",
+					 def=function(.Object)
+						 standardGeneric("compare_ll_p_getters")
+					)

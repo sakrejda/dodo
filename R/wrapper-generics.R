@@ -45,8 +45,8 @@ setGeneric(name="set_P",
 					 valueClass = "matrix")
 
 setGeneric(name="get_ll_phi_components",
-					 def=function(.Object) standardGeneric("get_ll_phi_components"),
+					 def=function(.Object, id) standardGeneric("get_ll_phi_components"),
 					 valueClass = "numeric")
 setGeneric(name="get_ll_p_components",
-					 def=function(.Object) standardGeneric("get_ll_p_components"),
+					 def=function(.Object, id) standardGeneric("get_ll_p_components"),
 					 valueClass = "numeric")

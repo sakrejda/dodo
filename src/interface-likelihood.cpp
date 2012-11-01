@@ -167,3 +167,23 @@ RcppExport SEXP get_ll_p_components_likelihood(SEXP xp) {
 	return Rcpp::wrap(ll_p_components);
 	END_RCPP
 }
+
+RcppExport SEXP get_some_ll_phi_components_likelihood(SEXP xp, SEXP indices) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	arma::Row<double> ll_phi_components;
+	arma::Col<arma::uword> indexes = Rcpp::as<arma::Col<arma::uword> >(indices);
+	ll_phi_components = R_likelihood_ptr->get_ll_phi_components(indexes);
+	return Rcpp::wrap(ll_phi_components);
+	END_RCPP
+}
+
+RcppExport SEXP get_some_ll_p_components_likelihood(SEXP xp, SEXP indices) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	arma::Row<double> ll_p_components;
+	arma::Col<arma::uword> indexes = Rcpp::as<arma::Col<arma::uword> >(indices);
+	ll_p_components = R_likelihood_ptr->get_ll_p_components(indexes);
+	return Rcpp::wrap(ll_p_components);
+	END_RCPP
+}

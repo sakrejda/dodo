@@ -105,8 +105,8 @@ setMethod(
 		}
 		N <- get_N(.Object)
 		id <- as.integer(id)
-		if (id > N) stop(cat("There are only ", N, " individuals.\n", sep=''))
-		if (id < 1) stop(cat("The first id is '1'.\n", sep=''))
+		if (id > N) stop(paste("There are only ", N, " individuals.\n", sep=''))
+		if (id < 1) stop(paste("The first id is '1'.\n", sep=''))
 		id <- id - 1 ## "-1" shifts to C/C++ indexing.
 		recaptures <- .Call("get_recaptures_likelihood", 
 												xp=.Object@pointer, id=id, PACKAGE="gaga")
@@ -221,7 +221,7 @@ setMethod(
 
 setMethod(
 	f = "get_ll_phi_components",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper", id="missing"),
 	definition = function(.Object) {
 		ll_phi_components <- .Call("get_ll_phi_components_likelihood", 
 															 xp=.Object@pointer, PACKAGE="gaga")
@@ -230,8 +230,30 @@ setMethod(
 )
 
 setMethod(
+	f = "get_ll_phi_components",
+	signature = signature(.Object = "likelihood_wrapper", id="numeric"),
+	definition = function(.Object, id) {
+		if (!is.numeric(id) || !is.integer(as.integer(id))) 
+		{ 
+			stop("Argument 'id' should be a numeric vector.")
+		}
+		if (any(id < 1)) {
+			stop("Argument 'id' should be a positive integer.")
+		}
+		N <- get_N(.Object)
+		id <- as.integer(id)
+		if (any(id > N)) stop(paste("There are only ", N, " individuals.\n", sep=''))
+		if (any(id < 1)) stop(paste("The first id is '1'.\n", sep=''))
+		id <- id - 1 # Shift to C/C++ indexing.
+		ll_phi_components <- .Call("get_some_ll_phi_components_likelihood", 
+															 xp=.Object@pointer, indices=id, PACKAGE="gaga")
+		return(as.vector(ll_phi_components))
+	}
+)
+
+setMethod(
 	f = "get_ll_p_components",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "likelihood_wrapper", id="missing"),
 	definition = function(.Object) {
 		ll_p_components <- .Call("get_ll_p_components_likelihood", 
 															 xp=.Object@pointer, PACKAGE="gaga")
@@ -240,6 +262,27 @@ setMethod(
 )
 
 
+setMethod(
+	f = "get_ll_p_components",
+	signature = signature(.Object = "likelihood_wrapper", id="numeric"),
+	definition = function(.Object, id) {
+		if (!is.numeric(id) || !is.integer(as.integer(id))) 
+		{ 
+			stop("Argument 'id' should be a numeric vector.")
+		}
+		if (any(id < 1)) {
+			stop("Argument 'id' should be a (vector of) positive integer(s).")
+		}
+		N <- get_N(.Object)
+		id <- as.integer(id)
+		if (any(id > N)) stop(paste("There are only ", N, " individuals.\n", sep=''))
+		if (any(id < 1)) stop(paste("The first id is '1'.\n", sep=''))
+		id <- id - 1 # Shift to C/C++ indexing.
+		ll_p_components <- .Call("get_some_ll_p_components_likelihood", 
+															 xp=.Object@pointer, indices=id, PACKAGE="gaga")
+		return(as.vector(ll_p_components))
+	}
+)
 
 
 

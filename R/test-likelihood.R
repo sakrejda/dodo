@@ -177,6 +177,117 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "compare_ll_phi_components",
+	signature = signature(.Object = "likelihood_wrapper"),
+	definition = function(.Object, PHI) {
+		PHI <- set_PHI(.Object, PHI)
+		cpp_ll_phi <- get_ll_phi_components(.Object)
+		R_ll_phi <- R_ll_phi_FUN(.Object)
+		test <- isTRUE(all.equal(cpp_ll_phi,R_ll_phi))
+		if (!test) {
+			for ( i in 1:get_N(.Object) ) {
+				test_i <- isTRUE(all.equal(cpp_ll_phi[i], R_ll_phi[i]))
+				fn <- sys.call()[[1]]
+				msg <- paste(
+					"Function '", fn, "' failed: check phi likelihood calculation.\n",
+					"\tIndividual: ", i, "\n",
+					"\tR\t\tphi components: ", R_ll_phi[i], "\n",
+					"\tC++\t\t phi components: ", cpp_ll_phi[i], "\n",
+					"\n", sep=''
+				)
+				warning(msg)
+				return(.Object)
+			}
+		}
+		return(TRUE)
+	}
+)
 
 
+setMethod(
+	f = "compare_ll_p_components",
+	signature = signature(.Object = "likelihood_wrapper"),
+	definition = function(.Object, P) {
+		P <- set_P(.Object, P)
+		cpp_ll_p <- get_ll_p_components(.Object)
+		R_ll_p <- R_ll_p_FUN(.Object)
+		test <- isTRUE(all.equal(cpp_ll_p,R_ll_p))
+		if (!test) {
+			for ( i in 1:get_N(.Object) ) {
+				test_i <- isTRUE(all.equal(cpp_ll_p[i], R_ll_p[i]))
+				fn <- sys.call()[[1]]
+				msg <- paste(
+					"Function '", fn, "' failed: check p likelihood calculation.\n",
+					"\tIndividual: ", i, "\n",
+					"\tR\t\tp components: ", R_ll_p[i], "\n",
+					"\tC++\t\tp components: ", cpp_ll_p[i], "\n",
+					"\n", sep=''
+				)
+				warning(msg)
+				return(.Object)
+			}
+		}
+		return(TRUE)
+	}
+)
 
+
+setMethod(
+	f = "compare_ll_phi_getters",
+	signature = signature(.Object = "likelihood_wrapper"),
+	definition = function(.Object) {
+		ll_phi_complete <- get_ll_phi_components(.Object)
+		ll_phi_from_partials <- ll_phi_complete
+		for ( i in 1:get_N(.Object)) {
+			ll_phi_from_partials[i] <- get_ll_phi_components(.Object,i)
+		}
+		test <- isTRUE(all.equal(ll_phi_complete, ll_phi_from_partials))
+		if (!test) {
+			for ( i in 1:get_N(.Object) ) {
+				test_i <- isTRUE(all.equal(ll_phi_complete[i], ll_phi_from_partials[i]))
+				fn <- sys.call()[[1]]
+				msg <- paste(
+					"Function '", fn, "' failed: check partial likelihood getters for phi.\n",
+					"\tIndividual: ", i, "\n",
+					"\tComplete phi components: ", ll_phi_from_partials[i], "\n",
+					"\tPartial phi components:  ", ll_phi_complete[i], "\n",
+					"\n", sep=''
+				)
+				warning(msg)
+				return(.Object)
+			}
+		}
+		return(TRUE)
+	}
+)
+
+
+setMethod(
+	f = "compare_ll_p_getters",
+	signature = signature(.Object = "likelihood_wrapper"),
+	definition = function(.Object) {
+		ll_p_complete <- get_ll_p_components(.Object)
+		ll_p_from_partials <- ll_p_complete
+		for ( i in 1:get_N(.Object)) {
+			ll_p_from_partials[i] <- get_ll_p_components(.Object,i)
+		}
+		test <- isTRUE(all.equal(ll_p_complete, ll_p_from_partials))
+		if (!test) {
+			for ( i in 1:get_N(.Object) ) {
+				test_i <- isTRUE(all.equal(ll_p_complete[i], ll_p_from_partials[i]))
+				fn <- sys.call()[[1]]
+				msg <- paste(
+					"Function '", fn, "' failed: check partial likelihood getters for p.\n",
+					"\tIndividual: ", i, "\n",
+					"\tComplete p components: ", ll_p_from_partials[i], "\n",
+					"\tPartial p components:  ", ll_p_complete[i], "\n",
+					"\n", sep=''
+				)
+				warning(msg)
+				return(.Object)
+			}
+		}
+		return(TRUE)
+	}
+)
