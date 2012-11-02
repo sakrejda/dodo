@@ -5,7 +5,7 @@ R_ll_phi_FUN <- function(.Object) {
 	survived <- as.list(1:get_N(.Object))
 	survived <- lapply(survived, function(id, births, deaths) {
 		last_alive <- deaths[id] - 2
-		if ( births[id] < last_alive ) {
+		if ( births[id] <= last_alive ) {
 			return( births[id]:last_alive )
 		} else {
 			return(NA)

@@ -89,6 +89,16 @@ RcppExport SEXP get_deaths_state(SEXP xp) {
 	return Rcpp::wrap(deaths);
 }
 
+RcppExport SEXP set_deaths_state(SEXP xp, SEXP id, SEXP td) {
+	arma::Row<int> deaths;
+	Rcpp::XPtr<Recapture_State_FLAT> R_state_ptr(xp);
+	arma::Col<arma::uword> i = Rcpp::as<arma::Col<arma::uword> >(id); 	
+	arma::Col<int> times_of_deaths = Rcpp::as<arma::Col<int> >(td);
+	R_state_ptr->set_td(i, times_of_deaths);
+	deaths = R_state_ptr->get_deaths();
+	return Rcpp::wrap(deaths);
+}
+
 
 
 

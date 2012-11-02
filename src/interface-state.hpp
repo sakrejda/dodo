@@ -14,5 +14,6 @@ RcppExport SEXP get_first_obs_state(SEXP xp);
 RcppExport SEXP get_last_obs_state(SEXP xp);
 RcppExport SEXP get_sampled_state(SEXP xp);
 RcppExport SEXP get_deaths_state(SEXP xp);
+RcppExport SEXP set_deaths_state(SEXP xp, SEXP id, SEXP td);
 
 #endif

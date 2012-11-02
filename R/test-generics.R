@@ -17,6 +17,10 @@ setGeneric(name="compare_deaths",
 					 def=function(.Object)
 						 standardGeneric("compare_deaths")
 					)
+setGeneric(name="compare_set_deaths",
+					 def=function(.Object, times_of_deaths)
+						 standardGeneric("compare_set_deaths")
+					)
 setGeneric(name="compare_first_obs",
 					 def=function(.Object)
 						 standardGeneric("compare_first_obs")

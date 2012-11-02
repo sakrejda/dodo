@@ -182,8 +182,37 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "set_deaths",
+	signature = signature(.Object = "state_wrapper", 
+												id = "numeric", times_of_deaths = "numeric"),
+	definition = function(.Object, id, times_of_deaths) {
+		if ( !is.vector(times_of_deaths) || 
+				 !is.integer(as.integer(times_of_deaths)) ||
+				 length(times_of_deaths) != length(id) ) {
+			stop("'times_of_deaths' must be a convertible to a vector of
+					 integers and the same length as 'times_of_recaptures'.")
+		}
+		
+		if (!is.numeric(id) || !is.integer(as.integer(id))) 
+		{ 
+			stop("Argument 'id' should be a numeric vector of length 1.")
+		}
+		if (any(id < 1)) {
+			stop("Argument 'id' should be a positive integer.")
+		}
+		N <- get_N(.Object)
+		id <- as.integer(id)
+		if (any(id > N)) stop(cat("There are only ", N, " individuals.\n", sep=''))
+		if (any(id < 1)) stop(cat("The first id is '1'.\n", sep=''))
 
-
+		id <- id - 1 ## "-1" shifts to C/C++ indexing.
+		times_of_deaths <- times_of_deaths - 1  ## "-1" shifts to C/C++ indexing.
+		deaths <- .Call("set_deaths_state", xp=.Object@pointer, 
+										id = id, td = times_of_deaths)
+		return(as.vector(deaths + 1)) ## "+1" shifts to R indexing.
+	}
+)
 
 
 

@@ -107,6 +107,31 @@ setMethod(
 )
 
 setMethod(
+	f = "compare_set_deaths",
+	signature = signature(.Object = "state_wrapper",
+												times_of_deaths = "numeric"),
+	definition = function(.Object, times_of_deaths) {
+		original_deaths <- times_of_deaths
+		returned_deaths <- set_deaths(.Object, 
+																	id = 1:get_N(.Object),
+																	times_of_deaths = times_of_deaths)
+		test <- all(original_deaths == returned_deaths)
+		if (!test) {
+			fn <- sys.call()[[1]]
+			msg <- paste(
+				"Function '", fn, "' failed: check deaths.\n",
+				"\tOriginal deaths: ", original_deaths, "\n",
+				"\tReturned deaths: ", returned_deaths, "\n",
+				"\n", sep=''
+			)
+			warning(msg)
+			return(.Object)
+		}
+		return(TRUE)
+	}
+)
+
+setMethod(
 	f = "compare_first_obs",
 	signature = signature(.Object = "state_wrapper"),
 	definition = function(.Object) {
