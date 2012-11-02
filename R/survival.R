@@ -14,7 +14,10 @@ R_ll_phi_FUN <- function(.Object) {
 	death_intervals <- deaths - 1
 	ll_phi <- vector(mode="numeric", length=get_N(xpl))
 	for ( i in 1:get_N(xpl) ) {
-		ll_phi[i] <- sum(log(PHI[i, survived[[i]] ])) + log(1-PHI[i,death_intervals[i]])
+		if (!is.na(survived[[i]][1])) {
+			ll_phi[i] <- sum(log(PHI[i, survived[[i]] ]))
+		}
+		ll_phi[i] <- ll_phi[i] + log(1-PHI[i,death_intervals[i]])
 	}
 	return(ll_phi)
 }
