@@ -53,3 +53,6 @@ setGeneric(name="get_ll_phi_components",
 setGeneric(name="get_ll_p_components",
 					 def=function(.Object, id) standardGeneric("get_ll_p_components"),
 					 valueClass = "numeric")
+setGeneric(name="get_log_posterior",
+					 def=function(.Object) standardGeneric("get_log_posterior"),
+					 valueClass = "numeric")
