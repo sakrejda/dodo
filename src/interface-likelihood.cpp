@@ -108,6 +108,16 @@ RcppExport SEXP get_deaths_likelihood(SEXP xp) {
 	END_RCPP
 }
 
+RcppExport SEXP set_deaths_likelihood(SEXP xp, SEXP id, SEXP td) {
+	arma::Row<int> deaths;
+	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
+	arma::Col<arma::uword> i = Rcpp::as<arma::Col<arma::uword> >(id); 	
+	arma::Col<int> times_of_deaths = Rcpp::as<arma::Col<int> >(td);
+	R_likelihood_ptr->set_td(i, times_of_deaths);
+	deaths = R_likelihood_ptr->get_deaths();
+	return Rcpp::wrap(deaths);
+}
+
 
 
 

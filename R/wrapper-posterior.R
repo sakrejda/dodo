@@ -1,5 +1,5 @@
-likelihood_wrapper <- setClass(
-	Class = "likelihood_wrapper",
+posterior_wrapper <- setClass(
+	Class = "posterior_wrapper",
 	representation = representation(
 		pointer = "externalptr",
 		times_of_surveys = "numeric",
@@ -29,7 +29,7 @@ likelihood_wrapper <- setClass(
 setMethod(
 	f = "initialize",
 	signature = signature(
-		.Object = "likelihood_wrapper"),
+		.Object = "posterior_wrapper"),
 	definition = function(.Object, 
 		times_of_surveys, times_of_recaptures,
 		times_of_deaths, known_deaths) {
@@ -67,16 +67,16 @@ setMethod(
 			times_of_deaths = as.integer(times_of_deaths) - 1,
 			known_deaths = known_deaths
   	)
-  	.Object@pointer <- .Call("load_recapture_likelihood", x=x, PACKAGE="gaga")
+  	.Object@pointer <- .Call("load_recapture_posterior", x=x, PACKAGE="gaga")
   	return(.Object)
 	}
 )
 
 setMethod(
 	f = "get_N",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		N <- .Call("get_N_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		N <- .Call("get_N_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(N)
 	}
 )
@@ -84,16 +84,16 @@ setMethod(
 
 setMethod(
 	f = "get_K",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		N <- .Call("get_K_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		N <- .Call("get_K_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(N)
 	}
 )
 
 setMethod(
 	f = "get_recaptures",
-	signature = signature(.Object = "likelihood_wrapper", id = "numeric"),
+	signature = signature(.Object = "posterior_wrapper", id = "numeric"),
 	definition = function(.Object, id) {
 		if (!is.numeric(id) || (length(id) != 1) || 
 			!is.integer(as.integer(id))) 
@@ -108,7 +108,7 @@ setMethod(
 		if (id > N) stop(paste("There are only ", N, " individuals.\n", sep=''))
 		if (id < 1) stop(paste("The first id is '1'.\n", sep=''))
 		id <- id - 1 ## "-1" shifts to C/C++ indexing.
-		recaptures <- .Call("get_recaptures_likelihood", 
+		recaptures <- .Call("get_recaptures_posterior", 
 												xp=.Object@pointer, id=id, PACKAGE="gaga")
 		return(as.vector(recaptures))
 	}
@@ -117,7 +117,7 @@ setMethod(
 
 setMethod(
 	f = "get_recaptures_matrix",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) { 
 		recaptures_matrix <- matrix(
 			data=NA, nrow=get_N(.Object), ncol=get_K(.Object))
@@ -130,61 +130,61 @@ setMethod(
 
 setMethod(
 	f = "get_surveys",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		surveys <- .Call("get_surveys_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		surveys <- .Call("get_surveys_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(surveys + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_births",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		births <- .Call("get_births_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		births <- .Call("get_births_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(births + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_first_obs",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		first_obs <- .Call("get_first_obs_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		first_obs <- .Call("get_first_obs_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(first_obs + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_last_obs",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		last_obs <- .Call("get_last_obs_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		last_obs <- .Call("get_last_obs_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(last_obs + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "get_sampled",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		sampled <- .Call("get_sampled_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		sampled <- .Call("get_sampled_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(sampled) 
 	}
 )
 
 setMethod(
 	f = "get_deaths",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		deaths <- .Call("get_deaths_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		deaths <- .Call("get_deaths_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(deaths + 1)) ## "+1" shifts to R indexing.
 	}
 )
 
 setMethod(
 	f = "set_deaths",
-	signature = signature(.Object = "likelihood_wrapper", 
+	signature = signature(.Object = "posterior_wrapper", 
 												id = "numeric", times_of_deaths = "numeric"),
 	definition = function(.Object, id, times_of_deaths) {
 		if ( !is.vector(times_of_deaths) || 
@@ -208,7 +208,7 @@ setMethod(
 
 		id <- id - 1 ## "-1" shifts to C/C++ indexing.
 		times_of_deaths <- times_of_deaths - 1  ## "-1" shifts to C/C++ indexing.
-		deaths <- .Call("set_deaths_likelihood", xp=.Object@pointer, 
+		deaths <- .Call("set_deaths_posterior", xp=.Object@pointer, 
 										id = id, td = times_of_deaths)
 		return(as.vector(deaths + 1)) ## "+1" shifts to R indexing.
 	}
@@ -217,45 +217,45 @@ setMethod(
 
 setMethod(
 	f = "get_PHI",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		PHI <- .Call("get_PHI_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		PHI <- .Call("get_PHI_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(PHI)
 	}
 )
 
 setMethod(
 	f = "get_P",
-	signature = signature(.Object = "likelihood_wrapper"),
+	signature = signature(.Object = "posterior_wrapper"),
 	definition = function(.Object) {
-		P <- .Call("get_P_likelihood", xp=.Object@pointer, PACKAGE="gaga")
+		P <- .Call("get_P_posterior", xp=.Object@pointer, PACKAGE="gaga")
 		return(P)
 	}
 )
 
 setMethod(
 	f = "set_PHI",
-	signature = signature(.Object = "likelihood_wrapper", PHI = "matrix"),
+	signature = signature(.Object = "posterior_wrapper", PHI = "matrix"),
 	definition = function(.Object, PHI) {
-		PHI_o <- .Call("set_PHI_likelihood", xp=.Object@pointer, PHI_ = PHI, PACKAGE="gaga")
+		PHI_o <- .Call("set_PHI_posterior", xp=.Object@pointer, PHI_ = PHI, PACKAGE="gaga")
 		return(PHI_o)
 	}
 )
 
 setMethod(
 	f = "set_P",
-	signature = signature(.Object = "likelihood_wrapper", P = "matrix"),
+	signature = signature(.Object = "posterior_wrapper", P = "matrix"),
 	definition = function(.Object, P) {
-		P_o <- .Call("set_P_likelihood", xp=.Object@pointer, P_ = P, PACKAGE="gaga")
+		P_o <- .Call("set_P_posterior", xp=.Object@pointer, P_ = P, PACKAGE="gaga")
 		return(P_o)
 	}
 )
 
 setMethod(
 	f = "get_ll_phi_components",
-	signature = signature(.Object = "likelihood_wrapper", id="missing"),
+	signature = signature(.Object = "posterior_wrapper", id="missing"),
 	definition = function(.Object) {
-		ll_phi_components <- .Call("get_ll_phi_components_likelihood", 
+		ll_phi_components <- .Call("get_ll_phi_components_posterior", 
 															 xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(ll_phi_components))
 	}
@@ -263,7 +263,7 @@ setMethod(
 
 setMethod(
 	f = "get_ll_phi_components",
-	signature = signature(.Object = "likelihood_wrapper", id="numeric"),
+	signature = signature(.Object = "posterior_wrapper", id="numeric"),
 	definition = function(.Object, id) {
 		if (!is.numeric(id) || !is.integer(as.integer(id))) 
 		{ 
@@ -277,7 +277,7 @@ setMethod(
 		if (any(id > N)) stop(paste("There are only ", N, " individuals.\n", sep=''))
 		if (any(id < 1)) stop(paste("The first id is '1'.\n", sep=''))
 		id <- id - 1 # Shift to C/C++ indexing.
-		ll_phi_components <- .Call("get_some_ll_phi_components_likelihood", 
+		ll_phi_components <- .Call("get_some_ll_phi_components_posterior", 
 															 xp=.Object@pointer, indices=id, PACKAGE="gaga")
 		return(as.vector(ll_phi_components))
 	}
@@ -285,9 +285,9 @@ setMethod(
 
 setMethod(
 	f = "get_ll_p_components",
-	signature = signature(.Object = "likelihood_wrapper", id="missing"),
+	signature = signature(.Object = "posterior_wrapper", id="missing"),
 	definition = function(.Object) {
-		ll_p_components <- .Call("get_ll_p_components_likelihood", 
+		ll_p_components <- .Call("get_ll_p_components_posterior", 
 															 xp=.Object@pointer, PACKAGE="gaga")
 		return(as.vector(ll_p_components))
 	}
@@ -296,7 +296,7 @@ setMethod(
 
 setMethod(
 	f = "get_ll_p_components",
-	signature = signature(.Object = "likelihood_wrapper", id="numeric"),
+	signature = signature(.Object = "posterior_wrapper", id="numeric"),
 	definition = function(.Object, id) {
 		if (!is.numeric(id) || !is.integer(as.integer(id))) 
 		{ 
@@ -310,11 +310,20 @@ setMethod(
 		if (any(id > N)) stop(paste("There are only ", N, " individuals.\n", sep=''))
 		if (any(id < 1)) stop(paste("The first id is '1'.\n", sep=''))
 		id <- id - 1 # Shift to C/C++ indexing.
-		ll_p_components <- .Call("get_some_ll_p_components_likelihood", 
+		ll_p_components <- .Call("get_some_ll_p_components_posterior", 
 															 xp=.Object@pointer, indices=id, PACKAGE="gaga")
 		return(as.vector(ll_p_components))
 	}
 )
 
 
+
+setMethod(
+	f = "get_log_posterior",
+	signature = signature(.Object = "posterior_wrapper"),
+	definition = function(.Object) {
+		lpd <- .Call("get_log_posterior_posterior", xp=.Object@pointer, PACKAGE="gaga")
+		return(lpd)
+	}
+)
 
