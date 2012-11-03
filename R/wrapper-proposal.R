@@ -319,7 +319,7 @@ setMethod(
 
 
 setMethod(
-	f = "get_log_proposal",
+	f = "get_log_posterior",
 	signature = signature(.Object = "proposal_wrapper"),
 	definition = function(.Object) {
 		lpd <- .Call("get_log_posterior_proposal", xp=.Object@pointer, PACKAGE="gaga")
