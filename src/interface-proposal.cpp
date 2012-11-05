@@ -92,10 +92,12 @@ RcppExport SEXP get_last_obs_proposal(SEXP xp) {
 }
 
 RcppExport SEXP get_sampled_proposal(SEXP xp) {
+	BEGIN_RCPP
 	Rcpp::XPtr<Recapture_Proposal_FLAT> R_proposal_ptr(xp);
 	std::vector<bool> sampled;
 	sampled = R_proposal_ptr->get_sampled();
 	return Rcpp::wrap(sampled);
+	END_RCPP
 }
 
 
@@ -109,6 +111,7 @@ RcppExport SEXP get_deaths_proposal(SEXP xp) {
 }
 
 RcppExport SEXP set_deaths_proposal(SEXP xp, SEXP id, SEXP td) {
+	BEGIN_RCPP
 	arma::Row<int> deaths;
 	Rcpp::XPtr<Recapture_Proposal_FLAT> R_proposal_ptr(xp);
 	arma::Col<arma::uword> i = Rcpp::as<arma::Col<arma::uword> >(id); 	
@@ -116,6 +119,7 @@ RcppExport SEXP set_deaths_proposal(SEXP xp, SEXP id, SEXP td) {
 	R_proposal_ptr->set_td(i, times_of_deaths);
 	deaths = R_proposal_ptr->get_deaths();
 	return Rcpp::wrap(deaths);
+	END_RCPP
 }
 
 
@@ -205,3 +209,15 @@ RcppExport SEXP get_log_posterior_proposal(SEXP xp) {
 	return Rcpp::wrap(lpost);
 	END_RCPP
 }
+
+
+RcppExport SEXP new_deaths_proposal(SEXP xp) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Proposal_FLAT> R_proposal_ptr(xp);
+	double log_asymmetry = R_proposal_ptr->propose_td();
+	return Rcpp::wrap(log_asymmetry);
+	END_RCPP
+}
+
+
+

@@ -92,10 +92,12 @@ RcppExport SEXP get_last_obs_likelihood(SEXP xp) {
 }
 
 RcppExport SEXP get_sampled_likelihood(SEXP xp) {
+	BEGIN_RCPP
 	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
 	std::vector<bool> sampled;
 	sampled = R_likelihood_ptr->get_sampled();
 	return Rcpp::wrap(sampled);
+	END_RCPP
 }
 
 
@@ -109,6 +111,7 @@ RcppExport SEXP get_deaths_likelihood(SEXP xp) {
 }
 
 RcppExport SEXP set_deaths_likelihood(SEXP xp, SEXP id, SEXP td) {
+	BEGIN_RCPP
 	arma::Row<int> deaths;
 	Rcpp::XPtr<Recapture_Likelihood_FLAT> R_likelihood_ptr(xp);
 	arma::Col<arma::uword> i = Rcpp::as<arma::Col<arma::uword> >(id); 	
@@ -116,6 +119,7 @@ RcppExport SEXP set_deaths_likelihood(SEXP xp, SEXP id, SEXP td) {
 	R_likelihood_ptr->set_td(i, times_of_deaths);
 	deaths = R_likelihood_ptr->get_deaths();
 	return Rcpp::wrap(deaths);
+	END_RCPP
 }
 
 

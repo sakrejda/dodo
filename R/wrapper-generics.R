@@ -56,3 +56,6 @@ setGeneric(name="get_ll_p_components",
 setGeneric(name="get_log_posterior",
 					 def=function(.Object) standardGeneric("get_log_posterior"),
 					 valueClass = "numeric")
+setGeneric(name="propose_deaths",
+					 def=function(.Object) standardGeneric("propose_deaths"),
+					 valueClass = "numeric")

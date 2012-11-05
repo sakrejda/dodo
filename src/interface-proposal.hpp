@@ -27,4 +27,7 @@ RcppExport SEXP get_some_ll_phi_components_proposal(SEXP xp, SEXP indices);
 RcppExport SEXP get_some_ll_p_components_proposal(SEXP xp, SEXP indices);
 RcppExport SEXP get_log_posterior_proposal(SEXP xp);
 
+RcppExport SEXP new_deaths_proposal(SEXP xp);
+
+
 #endif

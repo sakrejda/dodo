@@ -327,3 +327,14 @@ setMethod(
 	}
 )
 
+
+setMethod(
+	f = "propose_deaths",
+	signature = signature(.Object = "proposal_wrapper"),
+	definition = function(.Object) {
+		log_asymmetry <- .Call("new_deaths_proposal", xp=.Object@pointer,
+													 PACKAGE="gaga")
+		return(log_asymmetry)
+	}
+)
+

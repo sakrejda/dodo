@@ -92,10 +92,12 @@ RcppExport SEXP get_last_obs_posterior(SEXP xp) {
 }
 
 RcppExport SEXP get_sampled_posterior(SEXP xp) {
+	BEGIN_RCPP
 	Rcpp::XPtr<Recapture_Posterior_FLAT> R_posterior_ptr(xp);
 	std::vector<bool> sampled;
 	sampled = R_posterior_ptr->get_sampled();
 	return Rcpp::wrap(sampled);
+	END_RCPP
 }
 
 
@@ -109,6 +111,7 @@ RcppExport SEXP get_deaths_posterior(SEXP xp) {
 }
 
 RcppExport SEXP set_deaths_posterior(SEXP xp, SEXP id, SEXP td) {
+	BEGIN_RCPP
 	arma::Row<int> deaths;
 	Rcpp::XPtr<Recapture_Posterior_FLAT> R_posterior_ptr(xp);
 	arma::Col<arma::uword> i = Rcpp::as<arma::Col<arma::uword> >(id); 	
@@ -116,6 +119,7 @@ RcppExport SEXP set_deaths_posterior(SEXP xp, SEXP id, SEXP td) {
 	R_posterior_ptr->set_td(i, times_of_deaths);
 	deaths = R_posterior_ptr->get_deaths();
 	return Rcpp::wrap(deaths);
+	END_RCPP
 }
 
 
