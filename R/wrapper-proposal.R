@@ -338,3 +338,21 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "get_last_pd",
+	signature = signature(.Object = "proposal_wrapper"),
+	definition = function(.Object) {
+		last_pd <- .Call("get_last_pd_proposal", xp=.Object@pointer,
+										 PACKAGE="gaga")
+		return(last_pd)
+	}
+)
+setMethod(
+	f = "get_pd",
+	signature = signature(.Object = "proposal_wrapper"),
+	definition = function(.Object) {
+		pd <- .Call("get_pd_proposal", xp=.Object@pointer,
+										 PACKAGE="gaga")
+		return(pd)
+	}
+)

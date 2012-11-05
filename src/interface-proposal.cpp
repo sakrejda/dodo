@@ -220,4 +220,19 @@ RcppExport SEXP new_deaths_proposal(SEXP xp) {
 }
 
 
+RcppExport SEXP get_last_pd_proposal(SEXP xp) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Proposal_FLAT> R_proposal_ptr(xp);
+	double last_pd = R_proposal_ptr->get_last_pd();
+	return Rcpp::wrap(last_pd);
+	END_RCPP
+}
+
+RcppExport SEXP get_pd_proposal(SEXP xp) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Proposal_FLAT> R_proposal_ptr(xp);
+	double pd = R_proposal_ptr->get_pd();
+	return Rcpp::wrap(pd);
+	END_RCPP
+}
 
