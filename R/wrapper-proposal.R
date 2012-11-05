@@ -342,11 +342,19 @@ setMethod(
 	f = "get_last_pd",
 	signature = signature(.Object = "proposal_wrapper"),
 	definition = function(.Object) {
-		last_pd <- .Call("get_last_pd_proposal", xp=.Object@pointer,
-										 PACKAGE="gaga")
+		last_pd <- .Call("get_last_pd_proposal", xp=.Object@pointer, PACKAGE="gaga")
 		return(last_pd)
 	}
 )
+setMethod(
+	f = "get_last_pd_vector",
+	signature = signature(.Object = "proposal_wrapper"),
+	definition = function(.Object) {
+		last_pd_vec <- .Call("calc_log_proposal_density", xp=.Object@pointer, PACKAGE="gaga")
+		return(last_pd_vec)
+	}
+)
+
 setMethod(
 	f = "get_pd",
 	signature = signature(.Object = "proposal_wrapper"),
