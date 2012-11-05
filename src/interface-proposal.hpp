@@ -31,6 +31,7 @@ RcppExport SEXP new_deaths_proposal(SEXP xp);
 RcppExport SEXP get_last_pd_proposal(SEXP xp);
 RcppExport SEXP get_pd_proposal(SEXP xp);
 RcppExport SEXP get_proposed_deaths_proposal(SEXP xp);
+RcppExport SEXP calc_log_proposal_density_proposal(SEXP xp);
 
 
 #endif

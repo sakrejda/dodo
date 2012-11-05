@@ -350,8 +350,8 @@ setMethod(
 	f = "get_last_pd_vector",
 	signature = signature(.Object = "proposal_wrapper"),
 	definition = function(.Object) {
-		last_pd_vec <- .Call("calc_log_proposal_density", xp=.Object@pointer, PACKAGE="gaga")
-		return(last_pd_vec)
+		last_pd_vec <- .Call("calc_log_proposal_density_proposal", xp=.Object@pointer, PACKAGE="gaga")
+		return(as.vector(last_pd_vec))
 	}
 )
 

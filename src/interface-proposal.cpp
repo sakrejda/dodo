@@ -245,10 +245,10 @@ RcppExport SEXP get_proposed_deaths_proposal(SEXP xp) {
 	END_RCPP
 }
 
-RcppExport SEXP calc_log_proposal_density(SEXP xp) {
+RcppExport SEXP calc_log_proposal_density_proposal(SEXP xp) {
 	BEGIN_RCPP
 	Rcpp::XPtr<Recapture_Proposal_FLAT> R_proposal_ptr(xp);
-	arma::Row<int> log_proposal_density;
+	arma::Col<double> log_proposal_density;
 	log_proposal_density = R_proposal_ptr->calc_log_proposal_density();
 	return Rcpp::wrap(log_proposal_density);
 	END_RCPP
