@@ -236,3 +236,11 @@ RcppExport SEXP get_pd_proposal(SEXP xp) {
 	END_RCPP
 }
 
+RcppExport SEXP get_proposed_deaths_proposal(SEXP xp) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Recapture_Proposal_FLAT> R_proposal_ptr(xp);
+	arma::Row<int> proposed_deaths;
+	proposed_deaths = R_proposal_ptr->get_proposed_deaths();
+	return Rcpp::wrap(proposed_deaths);
+	END_RCPP
+}

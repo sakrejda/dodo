@@ -30,6 +30,7 @@ RcppExport SEXP get_log_posterior_proposal(SEXP xp);
 RcppExport SEXP new_deaths_proposal(SEXP xp);
 RcppExport SEXP get_last_pd_proposal(SEXP xp);
 RcppExport SEXP get_pd_proposal(SEXP xp);
+RcppExport SEXP get_proposed_deaths_proposal(SEXP xp);
 
 
 #endif

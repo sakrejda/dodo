@@ -65,4 +65,6 @@ setGeneric(name="get_last_pd",
 setGeneric(name="get_pd",
 					 def=function(.Object) standardGeneric("get_pd"),
 					 valueClass = "numeric")
-
+setGeneric(name="get_proposed_deaths",
+					 def=function(.Object) standardGeneric("get_proposed_deaths"),
+					 valueClass = "numeric")

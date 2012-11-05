@@ -356,3 +356,12 @@ setMethod(
 		return(pd)
 	}
 )
+
+setMethod(
+	f = "get_proposed_deaths",
+	signature = signature(.Object = "proposal_wrapper"),
+	definition = function(.Object) {
+		deaths <- .Call("get_proposed_deaths_proposal", xp=.Object@pointer, PACKAGE="gaga")
+		return(as.vector(deaths + 1)) ## "+1" shifts to R indexing.
+	}
+)
