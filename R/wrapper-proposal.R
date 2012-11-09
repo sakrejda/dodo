@@ -1,0 +1,344 @@
+posterior_and_proposal_wrapper <- setClass(
+	Class = "posterior_and_proposal_wrapper",
+	representation = representation(
+		posterior_pointer 	= "externalptr",
+		proposal_pointer  	= "externalptr",
+		times_of_surveys 		= "numeric",
+		times_of_recaptures = "list",
+		times_of_deaths 		= "numeric",
+		known_deaths 				= "logical"
+	),
+	prototype = prototype(
+		posterior_pointer = NULL,
+		proposal_pointer = NULL,
+		times_of_surveys = 0,
+		times_of_recaptures = list(0),
+		times_of_deaths = 0,
+		known_deaths = FALSE
+	),
+	validity = function(object) {
+		if ( !is.null(object@posterior_pointer) || 
+				class(object@posterior_pointer) != "externalptr" ) return(FALSE)
+		if ( !is.null(object@proposal_pointer) || 
+				class(object@proposal_pointer) != "externalptr" ) return(FALSE)
+		if ( !is.numeric(object@times_of_surveys) ) return(FALSE)
+		if ( !all(sapply(object@times_of_recaptures,is.numeric)) ) return(FALSE)
+		if ( !is.numeric(object@times_of_deaths) ) return(FALSE)
+		if ( !is.logical(object@known_deaths) ) return(FALSE)
+		return(TRUE)
+	},
+	sealed = TRUE
+)
+
+setMethod(
+	f = "initialize",
+	signature = signature(
+		.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object, 
+		times_of_surveys, times_of_recaptures,
+		times_of_deaths, known_deaths) {
+	  if ( !is.vector(times_of_surveys) || !is.integer(as.integer(times_of_surveys))) {
+    	stop("'times_of_surveys' must be convertible to a vector of integers.")
+  	}
+  	if ( !is.list(times_of_recaptures) || !all(sapply(times_of_recaptures, is.vector)) ||
+       !all(sapply(times_of_recaptures, function(x) {is.integer(as.integer(x))}))
+  	) {
+    	stop("'times_of_recaptures' must be a list of vectors of integers.")
+  	}
+		if ( !is.vector(times_of_deaths) || 
+				 !is.integer(as.integer(times_of_deaths)) ||
+				 length(times_of_deaths) != length(times_of_recaptures) ) {
+			stop("'times_of_deaths' must be a convertible to a vector of
+					 integers and the same length as 'times_of_recaptures'.")
+		}
+		if ( !is.vector(known_deaths) || 
+				 !is.logical(known_deaths) ||
+				 length(known_deaths) != length(times_of_recaptures) ) {
+			stop("'known_deaths' must be a convertible to a vector of
+					 integers and the same length as 'times_of_recaptures'.")
+		}
+
+
+		.Object@times_of_surveys = times_of_surveys
+		.Object@times_of_recaptures = times_of_recaptures
+		.Object@times_of_deaths = times_of_deaths
+		.Object@known_deaths = known_deaths
+  	x <- list(  ## "-1" shifts to C/C++ indexing.
+    	times_of_surveys = as.integer(times_of_surveys) - 1,
+    	times_of_recaptures = lapply(
+      	X = times_of_recaptures,
+      	FUN = function(x) { return(as.integer(x) - 1) }),
+			times_of_deaths = as.integer(times_of_deaths) - 1,
+			known_deaths = known_deaths
+  	)
+		ptrs <- .Call("load_recapture_posterior", x=x, PACKAGE="gaga")
+  	.Object@posterior_pointer <- ptrs[['posterior_ptr']]
+		.Object@proposal_pointer  <- ptrs[['slice_ptr']]
+		return(.Object)
+	}
+)
+
+setMethod(
+	f = "get_N",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		N <- .Call("get_N_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(N)
+	}
+)
+
+
+setMethod(
+	f = "get_K",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		N <- .Call("get_K_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(N)
+	}
+)
+
+setMethod(
+	f = "get_recaptures",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", id = "numeric"),
+	definition = function(.Object, id) {
+		if (!is.numeric(id) || (length(id) != 1) || 
+			!is.integer(as.integer(id))) 
+		{ 
+			stop("Argument 'id' should be a numeric vector of length 1.")
+		}
+		if (id < 1) {
+			stop("Argument 'id' should be a positive integer.")
+		}
+		N <- get_N(.Object)
+		id <- as.integer(id)
+		if (id > N) stop(paste("There are only ", N, " individuals.\n", sep=''))
+		if (id < 1) stop(paste("The first id is '1'.\n", sep=''))
+		id <- id - 1 ## "-1" shifts to C/C++ indexing.
+		recaptures <- .Call("get_recaptures_posterior", 
+												xp=.Object@posterior_pointer, id=id, PACKAGE="gaga")
+		return(as.vector(recaptures))
+	}
+)
+
+
+setMethod(
+	f = "get_recaptures_matrix",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) { 
+		recaptures_matrix <- matrix(
+			data=NA, nrow=get_N(.Object), ncol=get_K(.Object))
+		for ( i in 1:get_N(.Object)) {
+			recaptures_matrix[i,] <- as.vector(get_recaptures(.Object, i))
+		}
+		return(recaptures_matrix)
+	}
+)
+
+setMethod(
+	f = "get_surveys",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		surveys <- .Call("get_surveys_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(as.vector(surveys + 1)) ## "+1" shifts to R indexing.
+	}
+)
+
+setMethod(
+	f = "get_births",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		births <- .Call("get_births_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(as.vector(births + 1)) ## "+1" shifts to R indexing.
+	}
+)
+
+setMethod(
+	f = "get_first_obs",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		first_obs <- .Call("get_first_obs_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(as.vector(first_obs + 1)) ## "+1" shifts to R indexing.
+	}
+)
+
+setMethod(
+	f = "get_last_obs",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		last_obs <- .Call("get_last_obs_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(as.vector(last_obs + 1)) ## "+1" shifts to R indexing.
+	}
+)
+
+setMethod(
+	f = "get_sampled",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		sampled <- .Call("get_sampled_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(sampled) 
+	}
+)
+
+setMethod(
+	f = "get_deaths",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		deaths <- .Call("get_deaths_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(as.vector(deaths + 1)) ## "+1" shifts to R indexing.
+	}
+)
+
+setMethod(
+	f = "set_deaths",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", 
+												id = "numeric", times_of_deaths = "numeric"),
+	definition = function(.Object, id, times_of_deaths) {
+		if ( !is.vector(times_of_deaths) || 
+				 !is.integer(as.integer(times_of_deaths)) ||
+				 length(times_of_deaths) != length(id) ) {
+			stop("'times_of_deaths' must be a convertible to a vector of
+					 integers and the same length as 'times_of_recaptures'.")
+		}
+		
+		if (!is.numeric(id) || !is.integer(as.integer(id))) 
+		{ 
+			stop("Argument 'id' should be a numeric vector of length 1.")
+		}
+		if (any(id < 1)) {
+			stop("Argument 'id' should be a positive integer.")
+		}
+		N <- get_N(.Object)
+		id <- as.integer(id)
+		if (any(id > N)) stop(cat("There are only ", N, " individuals.\n", sep=''))
+		if (any(id < 1)) stop(cat("The first id is '1'.\n", sep=''))
+
+		id <- id - 1 ## "-1" shifts to C/C++ indexing.
+		times_of_deaths <- times_of_deaths - 1  ## "-1" shifts to C/C++ indexing.
+		deaths <- .Call("set_deaths_posterior", xp=.Object@posterior_pointer, 
+										id = id, td = times_of_deaths)
+		return(as.vector(deaths + 1)) ## "+1" shifts to R indexing.
+	}
+)
+
+
+setMethod(
+	f = "get_PHI",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		PHI <- .Call("get_PHI_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(PHI)
+	}
+)
+
+setMethod(
+	f = "get_P",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		P <- .Call("get_P_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(P)
+	}
+)
+
+setMethod(
+	f = "set_PHI",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", PHI = "matrix"),
+	definition = function(.Object, PHI) {
+		PHI_o <- .Call("set_PHI_posterior", xp=.Object@posterior_pointer, PHI_ = PHI, PACKAGE="gaga")
+		return(PHI_o)
+	}
+)
+
+setMethod(
+	f = "set_P",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", P = "matrix"),
+	definition = function(.Object, P) {
+		P_o <- .Call("set_P_posterior", xp=.Object@posterior_pointer, P_ = P, PACKAGE="gaga")
+		return(P_o)
+	}
+)
+
+setMethod(
+	f = "get_ll_phi_components",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", id="missing"),
+	definition = function(.Object) {
+		ll_phi_components <- .Call("get_ll_phi_components_posterior", 
+															 xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(as.vector(ll_phi_components))
+	}
+)
+
+setMethod(
+	f = "get_ll_phi_components",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", id="numeric"),
+	definition = function(.Object, id) {
+		if (!is.numeric(id) || !is.integer(as.integer(id))) 
+		{ 
+			stop("Argument 'id' should be a numeric vector.")
+		}
+		if (any(id < 1)) {
+			stop("Argument 'id' should be a positive integer.")
+		}
+		N <- get_N(.Object)
+		id <- as.integer(id)
+		if (any(id > N)) stop(paste("There are only ", N, " individuals.\n", sep=''))
+		if (any(id < 1)) stop(paste("The first id is '1'.\n", sep=''))
+		id <- id - 1 # Shift to C/C++ indexing.
+		ll_phi_components <- .Call("get_some_ll_phi_components_posterior", 
+															 xp=.Object@posterior_pointer, indices=id, PACKAGE="gaga")
+		return(as.vector(ll_phi_components))
+	}
+)
+
+setMethod(
+	f = "get_ll_p_components",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", id="missing"),
+	definition = function(.Object) {
+		ll_p_components <- .Call("get_ll_p_components_posterior", 
+															 xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(as.vector(ll_p_components))
+	}
+)
+
+
+setMethod(
+	f = "get_ll_p_components",
+	signature = signature(.Object = "posterior_and_proposal_wrapper", id="numeric"),
+	definition = function(.Object, id) {
+		if (!is.numeric(id) || !is.integer(as.integer(id))) 
+		{ 
+			stop("Argument 'id' should be a numeric vector.")
+		}
+		if (any(id < 1)) {
+			stop("Argument 'id' should be a (vector of) positive integer(s).")
+		}
+		N <- get_N(.Object)
+		id <- as.integer(id)
+		if (any(id > N)) stop(paste("There are only ", N, " individuals.\n", sep=''))
+		if (any(id < 1)) stop(paste("The first id is '1'.\n", sep=''))
+		id <- id - 1 # Shift to C/C++ indexing.
+		ll_p_components <- .Call("get_some_ll_p_components_posterior", 
+															 xp=.Object@posterior_pointer, indices=id, PACKAGE="gaga")
+		return(as.vector(ll_p_components))
+	}
+)
+
+
+
+setMethod(
+	f = "get_log_posterior",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		lpd <- .Call("get_log_posterior_posterior", xp=.Object@posterior_pointer, PACKAGE="gaga")
+		return(lpd)
+	}
+)
+
+setMethod(
+	f = "propose_deaths",
+	signature = signature(.Object = "posterior_and_proposal_wrapper"),
+	definition = function(.Object) {
+		new_deaths <- .Call("propose_deaths_posterior_proposal",
+												xp=.Object@proposal_pointer, PACKAGE="gaga")
+		return(new_deaths)
+	}
+)

@@ -5,5 +5,6 @@
 #include <proposals_FLAT.hpp>
 
 RcppExport SEXP load_recapture_posterior_proposal(SEXP x);
+RcppExport SEXP propose_deaths_posterior_proposal(SEXP xp);
 
 #endif

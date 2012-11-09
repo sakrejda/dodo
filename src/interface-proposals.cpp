@@ -29,3 +29,10 @@ RcppExport SEXP load_recapture_posterior_proposal(SEXP x) {
 	END_RCPP
 }
 
+RcppExport SEXP propose_deaths_posterior_proposal(SEXP xp) {
+	BEGIN_RCPP
+	Rcpp::XPtr<Slice_Proposal_FLAT> R_slice_ptr(xp);
+	arma::Row<double> new_deaths = R_slice_ptr->propose_td();
+	return Rcpp::wrap(new_deaths);
+	END_RCPP
+}
