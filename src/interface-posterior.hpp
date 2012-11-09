@@ -2,7 +2,7 @@
 #define INTERFACE_POSTERIOR_H
 
 #include <Rcpp.h>
-#include <survival.hpp>
+#include <survival_FLAT.hpp>
 
 RcppExport SEXP load_recapture_posterior(SEXP x);
 RcppExport SEXP get_N_posterior(SEXP xp);

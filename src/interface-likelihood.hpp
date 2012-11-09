@@ -2,7 +2,7 @@
 #define INTERFACE_LIKELIHOOD_H
 
 #include <Rcpp.h>
-#include <survival.hpp>
+#include <survival_FLAT.hpp>
 
 RcppExport SEXP load_recapture_likelihood(SEXP x);
 RcppExport SEXP get_N_likelihood(SEXP xp);

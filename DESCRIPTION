@@ -10,4 +10,4 @@ Description: Interface code to load data, as well as initialize and
 License: GPL
 Depends: Rcpp (>= 0.9.10)
 LinkingTo: Rcpp, RcppArmadillo
-Collate: survival.R wrapper-generics.R test-generics.R wrapper-data.R wrapper-state.R wrapper-likelihood.R wrapper-posterior.R wrapper-proposal.R test-data.R test-state.R test-likelihood.R 
+Collate: survival.R wrapper-generics.R test-generics.R wrapper-data.R wrapper-state.R wrapper-likelihood.R wrapper-posterior.R test-data.R test-state.R test-likelihood.R 

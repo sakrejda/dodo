@@ -1,5 +1,5 @@
 #include "interface-likelihood.hpp"
-#include <survival.hpp>
+#include <survival_FLAT.hpp>
 #include <RcppArmadillo.h>
 
 

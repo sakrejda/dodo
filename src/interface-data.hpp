@@ -2,7 +2,7 @@
 #define INTERFACE_DATA_H
 
 #include <Rcpp.h>
-#include <survival.hpp>
+#include <survival_FLAT.hpp>
 
 RcppExport SEXP load_recapture_data(SEXP x);
 RcppExport SEXP get_N_data(SEXP xp);

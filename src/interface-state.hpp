@@ -2,7 +2,7 @@
 #define INTERFACE_STATE_H
 
 #include <Rcpp.h>
-#include <survival.hpp>
+#include <survival_FLAT.hpp>
 
 RcppExport SEXP load_recapture_state(SEXP x);
 RcppExport SEXP get_N_state(SEXP xp);
