@@ -1,5 +1,6 @@
 useDynLib(gaga)
 exportPattern("^[[:alpha:]]+")
 exportPattern("^[^\\.]")
+importFrom(MASS, mvrnorm)
 
 
