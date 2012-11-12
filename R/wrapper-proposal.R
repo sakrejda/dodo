@@ -347,7 +347,7 @@ setMethod(
 	f = "propose_PHI_and_P_GRW",
 	signature = signature(.Object = "posterior_and_proposal_wrapper",
 												MU = "numeric", SIGMA = "matrix"),
-	definition = function(.Object) {
+	definition = function(.Object, MU, SIGMA) {
 		require(MASS)
 		PHI <- unique(get_PHI(.Object))
 		P <- unique(get_P(.Object))
