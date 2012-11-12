@@ -21,8 +21,8 @@ RcppExport SEXP load_recapture_posterior_proposal(SEXP x) {
 	Recapture_Posterior_FLAT* posterior_ptr = new Recapture_Posterior_FLAT(tos, tor, tods, kds);
 	Rcpp::XPtr<Recapture_Posterior_FLAT> R_posterior_ptr( posterior_ptr, true );
 
-	Slice_Proposal_FLAT* slice_ptr = new Slice_Proposal_FLAT(*posterior_ptr);
-	Rcpp::XPtr<Slice_Proposal_FLAT> R_slice_ptr( slice_ptr, true);
+	Slice_td_Proposal_FLAT* slice_ptr = new Slice_td_Proposal_FLAT(*posterior_ptr);
+	Rcpp::XPtr<Slice_td_Proposal_FLAT> R_slice_ptr( slice_ptr, true);
 
 	return Rcpp::List::create(Rcpp::Named("posterior_ptr") = R_posterior_ptr,
 														Rcpp::Named("slice_ptr")     = R_slice_ptr);
@@ -31,8 +31,8 @@ RcppExport SEXP load_recapture_posterior_proposal(SEXP x) {
 
 RcppExport SEXP propose_deaths_posterior_proposal(SEXP xp) {
 	BEGIN_RCPP
-	Rcpp::XPtr<Slice_Proposal_FLAT> R_slice_ptr(xp);
-	arma::Row<double> new_deaths = R_slice_ptr->propose_td();
+	Rcpp::XPtr<Slice_td_Proposal_FLAT> R_slice_ptr(xp);
+	arma::Row<int> new_deaths = R_slice_ptr->propose_td();
 	return Rcpp::wrap(new_deaths);
 	END_RCPP
 }

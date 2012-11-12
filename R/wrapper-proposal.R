@@ -71,7 +71,7 @@ setMethod(
 			times_of_deaths = as.integer(times_of_deaths) - 1,
 			known_deaths = known_deaths
   	)
-		ptrs <- .Call("load_recapture_posterior", x=x, PACKAGE="gaga")
+		ptrs <- .Call("load_recapture_posterior_proposal", x=x, PACKAGE="gaga")
   	.Object@posterior_pointer <- ptrs[['posterior_ptr']]
 		.Object@proposal_pointer  <- ptrs[['slice_ptr']]
 		return(.Object)
@@ -339,6 +339,19 @@ setMethod(
 	definition = function(.Object) {
 		new_deaths <- .Call("propose_deaths_posterior_proposal",
 												xp=.Object@proposal_pointer, PACKAGE="gaga")
-		return(new_deaths)
+		return(as.vector(new_deaths) + 1) # "+1" shifts from C/C++ to R indexing.
+	}
+)
+
+setMethod(
+	f = "propose_PHI_and_P_GRW",
+	signature = signature(.Object = "posterior_and_proposal_wrapper",
+												MU = "numeric", SIGMA = "matrix"),
+	definition = function(.Object) {
+		require(MASS)
+		PHI <- unique(get_PHI(.Object))
+		P <- unique(get_P(.Object))
+		new_params <- mvrnorm(n=1, mu=MU, Sigma=SIGMA)
+		return(list(PHI=new_params[1], P=new_params[2]))
 	}
 )
