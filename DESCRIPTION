@@ -1,13 +1,13 @@
-Package: gaga
+Package: dodo
 Type: Package
-Title: This is an interface to the Luxemburg MCMC library.
+Title: Code to run IPM in R, with some C++ backend calculations.
 Version: 0.1.1
 Date: 2012-10-24
 Author: Krzysztof Sakrejda <krzysztof.sakrejda@gmail.com>
 Maintainer: Krzysztof Sakrejda <krzysztof.sakrejda@gmail.com>
-Description: Interface code to load data, as well as initialize and
-	test algorithms and store/process output.
+Description: IPM (Ellner XXXX), implemented for Atlantic salmon through
+to smolting, maybe generalizable.
 License: GPL
 Depends: Rcpp (>= 0.9.10)
 LinkingTo: Rcpp, RcppArmadillo
-Collate: survival.R wrapper-generics.R test-generics.R wrapper-data.R wrapper-state.R wrapper-likelihood.R wrapper-posterior.R wrapper-proposal.R test-data.R test-state.R test-likelihood.R 
+Collate: 

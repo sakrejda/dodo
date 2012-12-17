@@ -1,4 +1,4 @@
-useDynLib(gaga)
+useDynLib(dodo)
 exportPattern("^[[:alpha:]]+")
 exportPattern("^[^\\.]")
 importFrom(MASS, mvrnorm)
