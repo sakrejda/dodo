@@ -13,7 +13,10 @@
 #					 def=function(.Object) standardGeneric("get_sampled"),
 #					 valueClass = "logical")
 #
-
+setGeneric(name="make_life_cycle",
+					 def=function(stages, parents, ...)
+						 standardGeneric("make_life_cycle"),
+					 	valueClass = "life_cycle")
 setGeneric(name="survive",
 					 def=function(.Object, model, covariates)
 						 standardGeneric("survive"),
@@ -22,5 +25,7 @@ setGeneric(name="grow",
 					 def=function(.Object, model, covariates)
 						 standardGeneric("grow"),
 						valueClass = "size_distribution")
-
-
+setGeneric(name="stage_names",
+					 def=function(.Object)
+						 standardGeneric("stage_names"),
+						 valueClass = "character")

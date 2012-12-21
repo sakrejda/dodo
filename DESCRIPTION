@@ -5,9 +5,8 @@ Version: 0.1.1
 Date: 2012-10-24
 Author: Krzysztof Sakrejda <krzysztof.sakrejda@gmail.com>
 Maintainer: Krzysztof Sakrejda <krzysztof.sakrejda@gmail.com>
-Description: IPM (Ellner XXXX), implemented for Atlantic salmon through
-to smolting, maybe generalizable.
+Description: IPM (Ellner XXXX), implemented for Atlantic salmon through to smolting, maybe generalizable.
 License: GPL
-Depends: Rcpp (>= 0.9.10)
+Depends: Rcpp (>= 0.9.10), RBGL, Matrix
 LinkingTo: Rcpp, RcppArmadillo
-Collate: 
+Collate: allGenerics.R  allClasses.R  initializeMethods.R projectionMethods.R  graphicalMethods.R lcMethods.R populationMethods.R
