@@ -26,6 +26,7 @@ setMethod(
 			FUN=estimator,
 			seed=seed_sample, bw=bw
 		)
+		.Object@sizes <- length(seed_sample) * (.Object@sizes/sum(.Object@sizes))
   	return(.Object)
 	}
 )
@@ -105,6 +106,20 @@ setMethod(
 
 setMethod(
 	f = "initialize",
+	signature = signature(.Object = "popList"),
+	definition = function(
+		.Object,
+		stage_name = NULL,
+		x = NULL
+	) {
+		if (!is.null(stage_name)) .Object@stage_name <- stage_name
+		if (!is.null(x)) .Object@.Data <- c(.Object@.Data, x, recursive=TRUE)
+		return(.Object)
+	}
+)
+
+setMethod(
+	f = "initialize",
 	signature = signature(.Object = "population"),
 	definition = function(
 		.Object,
@@ -115,8 +130,8 @@ setMethod(
 		.Object@life_cycle = new('life_cycle', stages = stages, parents = parents) 
 		stage_names <- stage_names(.Object@life_cycle)
 		for ( stage in stage_names ) {
-			.Object@space[[stage]] <- list()
-			.Object@promoted[[stage]] <- list()
+			.Object@space[[stage]] <- new('popList', stage_name = stage) 
+			.Object@promoted[[stage]] <- new('popList',stage_name = stage)
 		}
 		return(.Object)
 	}

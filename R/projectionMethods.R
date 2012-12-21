@@ -42,10 +42,7 @@ setMethod(
 			### Relies on recycling to get the right number of entries:
 			newdata[[nom]] <- covariates[[nom]]
 		}
-		### Next loop can be parallel (foreach or explicit)...
-		### This is either fast because there are few bins,
-		### or the efficiency drop from a loop is small because the
-		### predict operation is large.
+		## Calculate means:
 		mu <- mapply(
 			FUN = function(size, newdata) {
 				newdata[['sizes']] <- size
@@ -55,6 +52,8 @@ setMethod(
 			size = .Object@midpoints,
 			MoreArgs = list(newdata=newdata)
 		)
+
+		## Apply error:
 		S <- mapply(
 			FUN = function(x,y, mod_sd) {
 				dnorm(x=y, mean=x, sd=mod_sd)
@@ -65,10 +64,13 @@ setMethod(
 				mod_sd = sd(residuals(model))
 			)
 		)
+
+		## Making sure that the transformation preserves mass:
 		S <- apply(
 			X=S, MARGIN=2, 
 			FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 
+		## Transform:
 		.Object@sizes <- as.vector(S %*% .Object@sizes)
 		return(.Object)
 	}

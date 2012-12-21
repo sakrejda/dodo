@@ -29,3 +29,11 @@ setGeneric(name="stage_names",
 					 def=function(.Object)
 						 standardGeneric("stage_names"),
 						 valueClass = "character")
+setGeneric(name="sync",
+					 def=function(p)
+						 standardGeneric("sync")
+					 )
+setGeneric(name="pool",
+					 def=function(l)
+						 standardGeneric("pool")
+					 )
