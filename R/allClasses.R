@@ -81,18 +81,18 @@ staged_size_distribution <- function(
 ###########################################################################
 ###########################################################################
 
-setOldClass("data.frame")
+#setOldClass("data.frame")
 
-popList <- setClass(
-	Class = "popList",
-	contains = "list",
-	representation = representation(
-		stage_name = "character"
-	),
-	prototype = prototype(
-		stage_name = "A"
-	)
-)
+#popList <- setClass(
+#	Class = "popList",
+#	contains = "list",
+#	representation = representation(
+#		stage_name = "character"
+#	),
+#	prototype = prototype(
+#		stage_name = "A"
+#	)
+#)
 
 population <- setClass(
 	Class = "population",
