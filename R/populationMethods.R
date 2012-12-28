@@ -64,7 +64,8 @@ setMethod(
 		noms <- stage_names(p)
 		### Parallelize:
 		for ( nom in noms ) {
-			p@space[[nom]] <- grow(p@space[[nom]])
+			model <- get_model(p = p, stage = nom, type = "grow")
+			p <- grow(p = p, stage = nom, model = model)
 		}
 		return(p)
 	}
@@ -77,7 +78,8 @@ setMethod(
 		noms <- stage_names(p)
 		### Parallelize:
 		for ( nom in noms ) {
-			p@space[[nom]] <- smolt(p@space[[nom]])
+			model <- get_model(p = p, stage = nom, type = "smolt")
+			p <- smolt(p = p, stage = nom, model = model)
 		}
 		return(p)
 	}
@@ -87,10 +89,12 @@ setMethod(
 	f = "survive",
 	signature = signature(p = "population"),
 	definition = function(p) {
-		noms <- stage_names(p)
+		edge_noms <- edges(p@life_cycle@graph)
 		### Parallelize:
-		for ( nom in noms ) {
-			p@space[[nom]] <- survive(p@space[[nom]])
+		for ( from in names(edges_noms) ) {
+			for ( to in edge_noms[[from]] ) {
+				model <- get_model(p, from, to, "survive")
+				p <- survive(p = p, from = from, to = to, model = model)
 		}
 		return(p)
 	}
@@ -106,5 +110,21 @@ setMethod(
 			p@space[[nom]] <- age(p@space[[nom]])
 		}
 		return(p)
+	}
+)
+
+setMethod(
+	f = "add_lc_model",
+	signature = signature(
+		.Object = "population",
+		from = "character",
+		to = "character",
+		type = "character",
+		model = "lc_lm"
+	),
+	definition = function(.Object, from, to, type, model) {
+		.Object@life_cycle <- add_lc_model(
+			.Object@life_cycle, from, to, type, model)
+		return(.Object)
 	}
 )

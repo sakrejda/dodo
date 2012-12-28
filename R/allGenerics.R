@@ -17,9 +17,13 @@ setGeneric(name="make_life_cycle",
 					 def=function(stages, parents, ...)
 						 standardGeneric("make_life_cycle"),
 					 	valueClass = "life_cycle")
-setGeneric(name="add_lc_model",
+setGeneric(name="add_lc_node_model",
+					 def=function(.Object, node, type, model)
+						 standardGeneric("add_lc_node_model"),
+						valueClass = "life_cycle")
+setGeneric(name="add_lc_transition_model",
 					 def=function(.Object, from, to, type, model)
-						 standardGeneric("add_lc_model"),
+						 standardGeneric("add_lc_transition_model"),
 						valueClass = "life_cycle")
 setGeneric(name="survive",
 					 def=function(.Object, model, covariates, 
