@@ -26,6 +26,44 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "survive",
+	signature = signature(
+		.Object = "size_distribution",
+		model = "formula",
+		covariates = "list",
+		coefficients = "numeric",
+		sigma = "numeric",
+		inverse_link = "function"
+	),
+	definition = function(.Object, model, covariates) {
+#		S <- matrix(0, nrow = .Object@n_bins, ncol = .Object@n_bins)
+		S <- diag(.Object@n_bins)
+		newdata <- data.frame(
+			row = 1:(.Object@n_bins),
+			sizes = .Object@midpoints
+		)
+		for ( nom in names(covariates) ) {
+			### Relies on recycling to get the right number of entries:
+			newdata[[nom]] <- covariates[[nom]]
+		}
+		mf <- model.frame(formula = formula, data = newdata)
+		diag(S) <- inverse_link(   # func passed as argument.
+				model.matrix(mf) %*% coefficients +
+				rnorm(nrow(mf),0,sigma)
+		)
+
+			
+		#predict(
+		#		object = model,
+		#		newdata = newdata,
+		#		type = 'response'
+		#	)
+
+		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		return(.Object)
+	}
+)
 
 setMethod(
 	f = "grow",
@@ -77,4 +115,51 @@ setMethod(
 )
 
 
+
+setMethod(
+	f = "grow",
+	signature = signature(
+		.Object = "size_distribution",
+		model = "formula",
+		covariates = "list",
+		coefficients = "numeric",
+		sigma = "numeric",
+		inverse_link = "function"
+	),
+	definition = function(.Object, model, covariates) {
+		newdata <- data.frame(
+			row = 1:(.Object@n_bins),
+			sizes = .Object@midpoints
+		)
+		for ( nom in names(covariates) ) {
+			### Relies on recycling to get the right number of entries:
+			newdata[[nom]] <- covariates[[nom]]
+		}
+
+		## Calculate means:
+		mf <- model.frame(formula = formula, data = newdata)
+		mu <- inverse_link(model.matrix(mf) %*% coefficients)
+
+		## Apply error:
+		S <- mapply(
+			FUN = function(x,y, mod_sd) {
+				dnorm(x=y, mean=x, sd=mod_sd)
+			},
+			x = mu,
+			MoreArgs = list(
+				y = .Object@midpoints, 
+				mod_sd = sigma
+			)
+		)
+
+		## Making sure that the transformation preserves mass:
+		S <- apply(
+			X=S, MARGIN=2, 
+			FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
+
+		## Transform:
+		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		return(.Object)
+	}
+)
 

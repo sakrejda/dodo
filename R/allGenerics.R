@@ -17,12 +17,18 @@ setGeneric(name="make_life_cycle",
 					 def=function(stages, parents, ...)
 						 standardGeneric("make_life_cycle"),
 					 	valueClass = "life_cycle")
+setGeneric(name="add_lc_model",
+					 def=function(.Object, from, to, type, model)
+						 standardGeneric("add_lc_model"),
+						valueClass = "life_cycle")
 setGeneric(name="survive",
-					 def=function(.Object, model, covariates)
+					 def=function(.Object, model, covariates, 
+												coefficients, sigma, inverse_link)
 						 standardGeneric("survive"),
 						valueClass = "size_distribution")
 setGeneric(name="grow",
-					 def=function(.Object, model, covariates)
+					 def=function(.Object, model, covariates,
+												coefficients, sigma, inverse_link)
 						 standardGeneric("grow"),
 						valueClass = "size_distribution")
 setGeneric(name="stage_names",
