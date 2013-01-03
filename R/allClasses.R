@@ -55,15 +55,21 @@ staged_size_distribution <- function(
 	age,
 	where = .GlobalEnv
 ) { 
+	### This factory sets the derived class, sets its init method, then
+	### defines the reference class with its initialize method (which
+	### just passes on the call.
+
 	staged_size_distribution <- setClass(
 		Class = paste(stage_name, "size_distribution", sep='_'),
 		contains = "size_distribution",
 		representation = representation(
+			id = "character",
 			stage = "numeric",
 			stage_name = "character",
 			month = "numeric"
 		),
 		prototype = prototype(
+			id = "",
 			stage = stage,
 			stage_name = stage_name,
 			age = age
@@ -75,41 +81,30 @@ staged_size_distribution <- function(
 		where = where,
 		sealed = SEAL
 	)
+
+	init_method <- setMethod(
+		f = "initialize",
+		signature = signature(
+			.Object = paste(stage_name, "size_distribution", sep='_')
+		),
+		definition = function(
+				.Object, 
+				seed_sample = rnorm(100), 
+				n_bins = length(seed_sample)/10, 
+				limits = c(
+					min = min(seed_sample) - .1*(max(seed_sample)-min(seed_sample)),
+					max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
+				),
+				bw=as.integer(length(seed_sample)/15)+1
+		) {
+			.Object <- callNextMethod()
+	  	return(.Object)
+		},
+		where = where
+	)
 	return(staged_size_distribution)	
 }
 
 ###########################################################################
 ###########################################################################
-
-#setOldClass("data.frame")
-
-#popList <- setClass(
-#	Class = "popList",
-#	contains = "list",
-#	representation = representation(
-#		stage_name = "character"
-#	),
-#	prototype = prototype(
-#		stage_name = "A"
-#	)
-#)
-
-population <- setClass(
-	Class = "population",
-	representation = representation(
-		life_cycle = "life_cycle",
-		space = "list",
-		promoted = "list"
-	),
-	prototype = prototype(
-		life_cycle = new('life_cycle'),
-		space = list(),
-		promoted = list()
-	),
-	validity = function(object) {
-		# Write fails conditions which return(FALSE)
-		return(TRUE)
-	},
-	sealed = SEAL
-)
 
