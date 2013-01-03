@@ -8,6 +8,17 @@ setMethod(
 	}
 )
 
+#setMethod(
+#	f = "plot",
+#	signature = signature(
+#		x = "population"
+#	),
+#	definition = function(x, ...) {
+#		### ONCE PER STAGE:::
+#		plot(x@midpoints, x@sizes, ...)
+#	}
+#)
+
 setMethod(
 	f = "plot",
 	signature = signature(

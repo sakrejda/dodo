@@ -36,7 +36,10 @@ setMethod(
 		sigma = "numeric",
 		inverse_link = "function"
 	),
-	definition = function(.Object, model, covariates) {
+	definition = function(
+		.Object, model, covariates,
+		coefficients, sigma, inverse_link
+	) {
 #		S <- matrix(0, nrow = .Object@n_bins, ncol = .Object@n_bins)
 		S <- diag(.Object@n_bins)
 		newdata <- data.frame(
@@ -126,7 +129,10 @@ setMethod(
 		sigma = "numeric",
 		inverse_link = "function"
 	),
-	definition = function(.Object, model, covariates) {
+	definition = function(
+		.Object, model, covariates,
+		coefficients, sigma, inverse_link
+	) {
 		newdata <- data.frame(
 			row = 1:(.Object@n_bins),
 			sizes = .Object@midpoints

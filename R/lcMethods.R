@@ -1,3 +1,5 @@
+setClass("lc_lm")
+
 
 setMethod(
 	f = "stage_names",
