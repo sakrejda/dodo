@@ -30,15 +30,6 @@ setMethod(
 	f = "survive",
 	signature = signature(
 		.Object = "size_distribution",
-		model = "lc_lm",
-		covariates = "list"
-	),
-
-
-setMethod(
-	f = "survive",
-	signature = signature(
-		.Object = "size_distribution",
 		model = "formula",
 		covariates = "list",
 		coefficients = "numeric",
