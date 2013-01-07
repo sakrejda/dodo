@@ -28,7 +28,7 @@ population <- setRefClass(
 			}
 
 			for ( stage in stage_names(.self$life_cycle) ) {
-				env[[stage]] <- new.env()
+				env[[stage]] <<- new.env()
 			}
 			return(.self)
 		},
@@ -39,18 +39,21 @@ population <- setRefClass(
 				stop("Populations are not compatible.")
 			}
 		},
-		stage_names = function() {										### Accessor for stage names in this population.
-			return(stage_names(.self$life_cycle))
+		survive = function(population) {								
+			sub_pops <<- mclapply(
+				X = sub_pops, 
+				FUN = survive, 
+					model = life_cycle,
+					covariates = env
+			)
 		},
-		grow = function(population) {									### Call the models, under 'grow' attribute which shift stage distribution.
-			sub_pops <- mclapply(
+		grow = function(population) {							
+			sub_pops <<- mclapply(
 				X = sub_pops, 
 				FUN = grow, 
-					life_cycle = life_cycle,
-					env = env
+					model = life_cycle,
+					covariates = env
 			)
-			}
-			### Check implementation in life_cycle first, for adding models...	
 		}
 	)
 )

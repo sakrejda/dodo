@@ -35,6 +35,21 @@ setMethod(
 )
 
 setMethod(
+	f = "get_lc_node_model",
+	signature = signature(
+		.Object = "life_cycle",
+		node = "character",
+		type = "character"
+	),
+	definition = function(.Object, node, type) {
+		o <- nodeData( self = .Object, n = node, 
+			attr = paste('pGLM', type, sep='_'))
+		return(o)
+	}
+)
+
+
+setMethod(
 	f = "add_lc_transition_model",
 	signature = signature(
 		.Object = "life_cycle",
@@ -58,5 +73,22 @@ setMethod(
 			attr = paste('pGLM', type, sep = '_')
 		) <- model
 		return(.Object)
+	}
+)
+
+setMethod(
+	f = "get_lc_transition_model",
+	signature = signature(
+		.Object = "life_cycle",
+		from = "character",
+		to = "character",
+		type = "character"
+	),
+	definition = function(.Object, from, to, type) {
+		o <- edgeData( self = .Object, 
+			from = from,
+			to = to,
+			attr = paste('pGLM', type, sep='_'))
+		return(o)
 	}
 )
