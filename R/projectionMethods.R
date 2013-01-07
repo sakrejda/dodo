@@ -269,3 +269,20 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "pool",
+	signature = signature(
+		... = "size_distribution"
+	),
+	definition = function(...) {
+		dots = as.list(match.call())
+		szs = sapply(X=dots[2:length(dots)], FUN=`@`, 'sizes')
+		o <- matrix(
+			data = unlist(szs),
+			nrow = length(dots[[2]]),
+			ncol = length(dots)
+		)
+		o <- apply(o, 2, sum)
+		return(o)
+	}
+)

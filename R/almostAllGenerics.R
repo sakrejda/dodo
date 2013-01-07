@@ -52,6 +52,6 @@ setGeneric(name="sync",
 						 standardGeneric("sync")
 					 )
 setGeneric(name="pool",
-					 def=function(l)
+					 def=function(...)
 						 standardGeneric("pool")
 					 )
