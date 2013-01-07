@@ -1,4 +1,3 @@
-setClass("pGLM")
 
 
 setMethod(

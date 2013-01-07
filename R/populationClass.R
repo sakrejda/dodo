@@ -2,6 +2,7 @@ population <- setRefClass(
 	Class = "population",
 	fields = list(
 		life_cycle = "life_cycle",
+		env = "list",
 		sub_pops = "list"
 	),
 	methods = list(
@@ -25,6 +26,10 @@ population <- setRefClass(
 			} else {
 				sub_pops <<- sub_pops
 			}
+
+			for ( stage in stage_names(.self$life_cycle) ) {
+				env[[stage]] <- new.env()
+			}
 			return(.self)
 		},
 		immigrate = function(population) {						### Have another pop immigrate to this one.
@@ -38,6 +43,13 @@ population <- setRefClass(
 			return(stage_names(.self$life_cycle))
 		},
 		grow = function(population) {									### Call the models, under 'grow' attribute which shift stage distribution.
+			sub_pops <- mclapply(
+				X = sub_pops, 
+				FUN = grow, 
+					life_cycle = life_cycle,
+					env = env
+			)
+			}
 			### Check implementation in life_cycle first, for adding models...	
 		}
 	)

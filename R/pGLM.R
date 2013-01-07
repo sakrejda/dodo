@@ -21,25 +21,25 @@
 #  }
 #
 
+setOldClass(Classes="family", prototype=gaussian())
+
 setRefClass(Class = "pGLM",
 	fields = list(
 		formula = "formula",
 		family = "family",
-		coefficients = "list",
+		coefficients = "numeric",
 		epsilon = "function",
 		covariates = "list",
 		data = "data.frame",
-		model_frame = "data.frame"
-	),
-	representation = list(
+		model_frame = "data.frame",
 		mm = "matrix",
 		mf = "data.frame",
 		dat = "data.frame"
 	),
 	methods = list(
 		initialize = function(
-			formula = y ~ 1, 
-			family = gaussian,
+			formula = ~ 1, 
+			family = gaussian(),
 			coefficients = list(),
 			epsilon = function() {0}
 		) {
@@ -52,28 +52,37 @@ setRefClass(Class = "pGLM",
 		model_matrix = function(
 			new_data = NULL, 
 			covariates = NULL,
-			n = 1
+			n = NULL 
 		) {
-			if (!is.null(new_data) && is.null(covariates) && (n == 1)) {
-				mf <- model.frame(formula = formula, data = new_data)
-			} else if (is.null(new_data) && !is.null(covariates) && !is.null(n)) {
+			if (!is.null(new_data)) n <- nrow(new_data)
+			if (is.null(new_data) && !is.null(covariates) && !is.null(n)) {
 		    new_data <- data.frame(row = 1:n)
 		    for ( nom in names(covariates) ) {
     		  ### Relies on recycling to get the right number of entries:
 		      new_data[[nom]] <- covariates[[nom]]
 		    }
+			} 
+			if (!is.null(new_data) && !is.null(n)) {
+				mf <<- model.frame(formula = formula, data = new_data)
 			} else { stop("Bad call to model_matrix method.") }
-			.self@mm <- model.matrix(mf)
+			mm <<- model.matrix(object = formula, data = mf)
 		},
 		predict = function(
 			newdata = NULL, 
 			covariates = NULL,
+			n = NULL, 
 			...
 		) {
 			ml <- as.list(match.call())
-			model_matrix(newdata, covariates)
-			pred <- .self@mm %*% coefficients
+			if (!is.null(newdata) || !is.null(covariates))
+				model_matrix(newdata, covariates, n)
+			if (ncol(.self$mm) == length(.self$coefficients)) {
+				pred <- .self$mm %*% coefficients + epsilon(n=n)
+			} else {
+				stop("Object not ready for predictions, model matrix not formed.\n\n")
+			}
 			return(pred)
-		}
+		},
+		errors = function(n = 100) epsilon(n=n)
 	)
 )
