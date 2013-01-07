@@ -55,6 +55,26 @@ population <- setRefClass(
 					covariates = env
 			)
 		},
+		smolt = function() {   #### CAREFUL: this will split a single stage
+													 ####			     into two, it will be important
+													 ####					 in recombining them to avoid
+													 ####   			 creating nested lists.
+			sub_pops <<- unlist(mclapply(
+				X = sub_pops, 
+				FUN = smolt, 
+					model = life_cycle,
+					covariates = env
+			))
+		},
+		age = function() {		#### CAREFUL: this will change the identity of
+													####					each stage... should be ok...
+			sub_pops <<- mclapply(
+				X = sub_pops, 
+				FUN = age, 
+					model = life_cycle,
+					covariates = env
+			)
+		},
 		sync = function() {
 			known_stages <- stage_names(.self$life_cycle)
 			present_stages <- sapply(X=sub_pops, FUN=function(x) {x@stage_name})
