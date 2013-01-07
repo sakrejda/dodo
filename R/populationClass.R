@@ -39,7 +39,7 @@ population <- setRefClass(
 				stop("Populations are not compatible.")
 			}
 		},
-		survive = function(population) {								
+		survive = function() {								
 			sub_pops <<- mclapply(
 				X = sub_pops, 
 				FUN = survive, 
@@ -47,7 +47,7 @@ population <- setRefClass(
 					covariates = env
 			)
 		},
-		grow = function(population) {							
+		grow = function() {							
 			sub_pops <<- mclapply(
 				X = sub_pops, 
 				FUN = grow, 
@@ -58,10 +58,12 @@ population <- setRefClass(
 		sync = function() {
 			known_stages <- stage_names(.self$life_cycle)
 			present_stages <- sapply(X=sub_pops, FUN=function(x) {x@stage_name})
+			known_stages <- known_stages[known_stages %in% present_stages]
 			o <- list()
 			for ( stage in known_stages ) {
 				o <- c(o,do.call(what=pool, args=sub_pops[ present_stages %in% stage ]))
 			}
+			sub_pops <<- o
 		}
 	)
 )
