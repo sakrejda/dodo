@@ -54,6 +54,14 @@ population <- setRefClass(
 					model = life_cycle,
 					covariates = env
 			)
+		},
+		sync = function() {
+			known_stages <- stage_names(.self$life_cycle)
+			present_stages <- sapply(X=sub_pops, FUN=function(x) {x@stage_name})
+			o <- list()
+			for ( stage in known_stages ) {
+				o <- c(o,do.call(what=pool, args=sub_pops[ present_stages %in% stage ]))
+			}
 		}
 	)
 )
