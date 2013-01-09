@@ -8,8 +8,11 @@ population <- setRefClass(
 	methods = list(
 		initialize = function(											### CONSTRUCTOR
 			stages = NULL, parents = NULL,
-			life_cycle = NULL, sub_pops = NULL
+			life_cycle = NULL, sub_pops = NULL, ...
 		) {
+			if (is.null(stages) && is.null(parents) && 
+					is.null(life_cycle) && is.null(sub_pops)) return(.self)
+
 			if (!is.null(stages) && !is.null(parents) && is.null(life_cycle)) {
 				life_cycle <<- new('life_cycle', stages = stages, parents = parents) 
 			} else {
@@ -30,6 +33,7 @@ population <- setRefClass(
 			for ( stage in stage_names(.self$life_cycle) ) {
 				env[[stage]] <<- new.env()
 			}
+			callSuper()
 			return(.self)
 		},
 		immigrate = function(population) {						### Have another pop immigrate to this one.
@@ -42,7 +46,7 @@ population <- setRefClass(
 		survive = function() {								
 			sub_pops <<- mclapply(
 				X = sub_pops, 
-				FUN = survive, 
+				FUN = survival, 
 					model = life_cycle,
 					covariates = env
 			)
@@ -58,7 +62,7 @@ population <- setRefClass(
 			)
 			sub_pops <<- mclapply(
 				X = sub_pops, 
-				FUN = grow, 
+				FUN = growth, 
 					model = life_cycle,
 					covariates = env
 			)
@@ -69,7 +73,7 @@ population <- setRefClass(
 													 ####   			 creating nested lists.
 			sub_pops <<- unlist(mclapply(
 				X = sub_pops, 
-				FUN = smolt, 
+				FUN = smolting, 
 					model = life_cycle,
 					covariates = env
 			))
@@ -78,7 +82,7 @@ population <- setRefClass(
 													####					each stage... should be ok...
 			sub_pops <<- mclapply(
 				X = sub_pops, 
-				FUN = age, 
+				FUN = aging, 
 					model = life_cycle,
 					covariates = env
 			)
@@ -104,6 +108,7 @@ setMethod(
 	f = "+",
 	signature = signature(e1 = "population", e2 = "size_distribution"),
 	definition = function(e1, e2) {
+		e1 <- e1$copy(shallow=FALSE)
 		e2 <- population$new(life_cycle = e1$life_cycle, sub_pops = list(e2))
 		e1$immigrate(e2)
 		return(e1)

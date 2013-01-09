@@ -157,7 +157,7 @@ staged_size_distribution <- function(
 ################################################################################
 
 setMethod(
-	f = "survive",
+	f = "survival",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "glm",
@@ -185,7 +185,7 @@ setMethod(
 )
 
 setMethod(
-	f = "survive",
+	f = "survival",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "pGLM",
@@ -208,7 +208,7 @@ setMethod(
 )
 
 setMethod(
-	f = "survive",
+	f = "survival",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "life_cycle",
@@ -217,13 +217,13 @@ setMethod(
 	definition = function(.Object, model, covariates) {
 		s_model = get_lc_node_model(model, .Object@stage_name, "survival")
 		covariates = covariates[[.Object@stage_name]]
-		.Object <- grow(.Object, model = s_model, covariates = covariates)
+		.Object <- survival(.Object, model = s_model, covariates = covariates)
 		return(.Object)
 	}
 )
 
 setMethod(
-	f = "survive",
+	f = "survival",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "formula",
@@ -252,13 +252,6 @@ setMethod(
 				rnorm(nrow(mf),0,sigma)
 		)
 
-			
-		#predict(
-		#		object = model,
-		#		newdata = newdata,
-		#		type = 'response'
-		#	)
-
 		.Object@sizes <- as.vector(S %*% .Object@sizes)
 		return(.Object)
 	}
@@ -266,14 +259,39 @@ setMethod(
 
 
 ################################################################################
+## Smolting method:  really cut/paste from survival (?), and it needs to
+## be a factory function..., ditto for aging.
 ################################################################################
+
+setMethod(
+	f = "smolting",
+	signature = signature(
+		.Object = "size_distribution",
+		model = "pGLM",
+		covariates = "list"
+	),
+	definition = function(.Object, model, covariates) {
+		S <- diag(.Object@n_bins)
+		newdata <- data.frame(
+			row = 1:(.Object@n_bins),
+		)
+		for ( nom in names(covariates) ) {
+			### Relies on recycling to get the right number of entries:
+			newdata[[nom]] <- covariates[[nom]]
+		}
+		diag(S) <- model$predict(newdata = newdata)
+		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		return(.Object)
+	}
+)
+	
 
 ################################################################################
 ################################################################################
 
 
 setMethod(
-	f = "grow",
+	f = "growth",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "lm",
@@ -323,7 +341,7 @@ setMethod(
 
 
 setMethod(
-	f = "grow",
+	f = "growth",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "pGLM",
@@ -371,7 +389,7 @@ setMethod(
 )
 
 setMethod(
-	f = "grow",
+	f = "growth",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "life_cycle",
@@ -380,13 +398,13 @@ setMethod(
 	definition = function(.Object, model, covariates) {
 		g_model = get_lc_node_model(model, .Object@stage_name, "grow")
 		covariates = covariates[[.Object@stage_name]]
-		.Object <- grow(.Object, model = g_model, covariates = covariates)
+		.Object <- growth(.Object, model = g_model, covariates = covariates)
 		return(.Object)
 	}
 )
 
 setMethod(
-	f = "grow",
+	f = "growth",
 	signature = signature(
 		.Object = "size_distribution",
 		model = "formula",
@@ -445,16 +463,10 @@ setMethod(
 	definition = function(...) {
 		dots = list(...)
 		szs = sapply(X=dots, FUN=function(x) x@sizes)
-		szs <- matrix(
-			data = unlist(szs),
-			nrow = length(dots[[1]]),
-			ncol = length(dots)
-		)
-		szs <- apply(szs, 2, sum)
+		szs <- apply(szs, 1, sum)
 		o <- dots[[1]]
 		o@sizes <- szs
 		return(o)
 	}
 )
-SEAL = FALSE
 

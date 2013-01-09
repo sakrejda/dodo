@@ -143,7 +143,7 @@ setMethod(
 		type = "character"
 	),
 	definition = function(.Object, node, type) {
-		o <- nodeData( self = .Object, n = node, 
+		o <- nodeData( self = .Object@graph, n = node, 
 			attr = paste('pGLM', type, sep='_'))
 		return(o)
 	}
@@ -186,7 +186,7 @@ setMethod(
 		type = "character"
 	),
 	definition = function(.Object, from, to, type) {
-		o <- edgeData( self = .Object, 
+		o <- edgeData( self = .Object@graph, 
 			from = from,
 			to = to,
 			attr = paste('pGLM', type, sep='_'))

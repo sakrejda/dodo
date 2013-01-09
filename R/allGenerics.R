@@ -1,19 +1,8 @@
+setClass("size_distribution")
 SEAL = FALSE
 
-# Examples...
-#setGeneric(name="get_N", 
-#					 def=function(.Object) standardGeneric("get_N"), 
-#					 valueClass = "numeric")
-#setGeneric(name="get_recaptures", 
-#					 def=function(.Object, id) standardGeneric("get_recaptures"),
-#					 valueClass = "numeric")
-#setGeneric(name="set_deaths",
-#					 def=function(.Object, id, times_of_deaths) standardGeneric("set_deaths"),
-#					 valueClass = "numeric")
-#setGeneric(name="get_sampled",
-#					 def=function(.Object) standardGeneric("get_sampled"),
-#					 valueClass = "logical")
-#
+
+## For life cycles:
 setGeneric(name="make_life_cycle",
 					 def=function(stages, parents, ...)
 						 standardGeneric("make_life_cycle"),
@@ -34,24 +23,44 @@ setGeneric(name="get_lc_transition_model",
 					 def=function(.Object, from, to, type)
 						 standardGeneric("get_lc_transition_model")
 					)
-setGeneric(name="survive",
-					 def=function(.Object, model, covariates, 
-												coefficients, sigma, inverse_link)
-						 standardGeneric("survive"),
-						valueClass = "size_distribution")
-setGeneric(name="grow",
-					 def=function(.Object, model, covariates,
-												coefficients, sigma, inverse_link)
-						 standardGeneric("grow"),
-						valueClass = "size_distribution")
 setGeneric(name="stage_names",
 					 def=function(.Object)
 						 standardGeneric("stage_names"),
 						 valueClass = "character")
-setGeneric(name="sync",
-					 def=function(p)
-						 standardGeneric("sync")
-					 )
+
+## For size_distributions, returning same, or list of same (use union on
+## valueClass?
+setGeneric(name="survival",
+					 def=function(.Object, model, covariates, 
+												coefficients, sigma, inverse_link)
+						 standardGeneric("survival"),
+						valueClass = "size_distribution")
+setGeneric(name="growth",
+					 def=function(.Object, model, covariates,
+												coefficients, sigma, inverse_link)
+						 standardGeneric("growth"),
+						valueClass = "size_distribution")
+setGeneric(name="smolting",
+					 def=function(.Object, model, covariates,
+												coefficients, sigma, inverse_link)
+						 standardGeneric("smolting")
+					)
+setGeneric(name="aging",
+					 def=function(.Object, model, covariates,
+												coefficients, sigma, inverse_link)
+						 standardGeneric("aging"),
+						valueClass = "size_distribution")
+
+setClassUnion(name="listORsize_distribution", 
+							members = c('list','size_distribution'))
+setGeneric(name="transition",
+					 def=function(.Object, model, covariates,
+												coefficients, sigma, inverse_link)
+						 standardGeneric("transition"),
+						valueClass = "listORsize_distribution"
+					)
+
+## For size_distributions, just adds up the density/number per bin.
 setGeneric(name="pool",
 					 def=function(...)
 						 standardGeneric("pool")
