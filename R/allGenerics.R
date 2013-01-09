@@ -1,3 +1,4 @@
+SEAL = FALSE
 
 # Examples...
 #setGeneric(name="get_N", 

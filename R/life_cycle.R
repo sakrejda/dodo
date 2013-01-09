@@ -25,7 +25,33 @@ life_cycle <- setClass(
 
 	
 ###########################################################################
+## Factory functions:
 ###########################################################################
+
+setInits <- function(stage_name, where = .GlobalEnv) {
+	init_method <- setMethod(
+		f = "initialize",
+		signature = signature(
+			.Object = paste(stage_name, "size_distribution", sep='_')
+		),
+		definition = function(
+				.Object, 
+				seed_sample = rnorm(100), 
+				n_bins = length(seed_sample)/10, 
+				limits = c(
+					min = min(seed_sample) - .1*(max(seed_sample)-min(seed_sample)),
+					max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
+				),
+				bw=as.integer(length(seed_sample)/15)+1
+		) {
+			.Object <- callNextMethod(.Object, seed_sample,
+																n_bins, limits, bw)
+	  	return(.Object)
+		},
+		where = where
+	)
+	return(init_method)
+}
 	
 setMethod(
 	f = "initialize",
