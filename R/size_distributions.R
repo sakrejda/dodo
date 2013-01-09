@@ -117,6 +117,10 @@ staged_size_distribution <- function(
 	return(staged_size_distribution)	
 }
 
+################################################################################
+### Transition method factory function.
+### Transition the object from stage A to B, or list(B,C)
+################################################################################
 
 ###########################################################################
 ## Initializer FACTORY function, need to provide stage_name.
