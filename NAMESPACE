@@ -3,4 +3,15 @@ exportPattern("^[[:alpha:]]+")
 exportPattern("^[^\\.]")
 importFrom(MASS, mvrnorm)
 
-
+### Add:
+# stage_transformations()
+# 		1) Get the order of the node models, j %in% [1,J], from life_cycle
+# 		2) Create (and cache, or use from cache in life_cycle), a (named) list
+# 			 with one level, j, for each model order, which should contain
+# 			 the names of the nodes which the model applies to.
+# 		3) For each j, run the model to transform all populations at the
+# 			 named node.  The models (not just pGLM, but methods capable of
+# 			 transforming a size_distribution) live as node attributes under
+# 			 the stage_name / attribute type combo, should run with:
+# 			 transform(.Object, covariates)
+# stage_transitions()
