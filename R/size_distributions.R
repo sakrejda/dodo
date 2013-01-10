@@ -56,6 +56,25 @@ setMethod(
   	return(.Object)
 	}
 )
+
+################################################################################
+### Pooling densities / numbers:
+################################################################################
+
+
+setMethod(
+	f = "pool",
+	signature = signature("size_distribution"),
+	definition = function(...) {
+		dots = list(...)
+		szs = sapply(X=dots, FUN=function(x) x@sizes)
+		szs <- apply(szs, 1, sum)
+		o <- dots[[1]]
+		o@sizes <- szs
+		return(o)
+	}
+)
+
 	
 ###########################################################################
 ## Class FACTORY function
@@ -117,43 +136,153 @@ staged_size_distribution <- function(
 	return(staged_size_distribution)	
 }
 
-################################################################################
-### Transition method factory function.
-### Transition the object from stage A to B, or list(B,C)
-################################################################################
-
-###########################################################################
-## Initializer FACTORY function, need to provide stage_name.
-## Not needed, done in class factory function.
-###########################################################################
-
-#setInits <- function(stage_name, where = .GlobalEnv) {
-#	init_method <- setMethod(
-#		f = "initialize",
-#		signature = signature(
-#			.Object = paste(stage_name, "size_distribution", sep='_')
-#		),
-#		definition = function(
-#				.Object, 
-#				seed_sample = rnorm(100), 
-#				n_bins = length(seed_sample)/10, 
-#				limits = c(
-#					min = min(seed_sample) - .1*(max(seed_sample)-min(seed_sample)),
-#					max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
-#				),
-#				bw=as.integer(length(seed_sample)/15)+1
-#		) {
-#			.Object <- callNextMethod(.Object, seed_sample,
-#																n_bins, limits, bw)
-#	  	return(.Object)
-#		},
-#		where = where
-#	)
-#	return(init_method)
-#}
-#
 
 ################################################################################
+### Staged survival method factory, takes stage_name, pGLM, env
+################################################################################
+
+staged_survival_factory <- function(
+	stage_name,
+	model,
+	where = .GlobalEnv
+) {
+
+	survival_method <- setMethod(
+		f = "survival",
+		signature = signature(
+			.Object = paste(stage_name, "size_distribution", sep='_'),
+			covariates = "list"
+		),
+		definition = function(.Object, covariates) {
+			S <- diag(.Object@n_bins)
+			newdata <- data.frame(
+				row = 1:(.Object@n_bins),
+				sizes = .Object@midpoints
+			)
+			for ( nom in names(covariates) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- covariates[[nom]]
+			}
+			diag(S) <- model$predict(newdata = newdata)
+			.Object@sizes <- as.vector(S %*% .Object@sizes)
+			return(.Object)
+		}
+	)
+
+	return(survival)
+}
+
+################################################################################
+### Staged growth method factory, takes stage_name, pGLM, env
+################################################################################
+
+staged_growth_factory <- function(
+	stage_name,
+	model,
+	where = .GlobalEnv
+) {
+
+	survival_method <- setMethod(
+		f = "growth",
+		signature = signature(
+			.Object = paste(stage_name, "size_distribution", sep='_'),
+			covariates = "list"
+		),
+		definition = function(.Object, covariates) {
+			newdata <- data.frame(
+				row = 1:(.Object@n_bins)
+			)
+			for ( nom in names(covariates) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- covariates[[nom]]
+			}
+			## Calculate means:
+			mu <- mapply(
+				FUN = function(size, newdata) {
+					newdata[['sizes']] <- size
+					mu <- model$predict(newdata = newdata)
+				},
+				size = .Object@midpoints,
+				MoreArgs = list(newdata=newdata)
+			)
+	
+			## Apply error:
+			S <- mapply(
+				FUN = function(x,y, mod_sd) {
+					dnorm(x=y, mean=x, sd=mod_sd)
+				},
+				x = mu,
+				MoreArgs = list(
+					y = .Object@midpoints, 
+					mod_sd = sd(model$errors(1000))
+				)
+			)
+	
+			## Making sure that the transformation preserves mass:
+			S <- apply(
+				X=S, MARGIN=2, 
+				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
+	
+			## Transform:
+			.Object@sizes <- as.vector(S %*% .Object@sizes)
+			return(.Object)
+	
+		}
+	)
+
+	return(growth)
+}
+
+################################################################################
+### Staged transition method factory, takes stage_name, pGLM, env
+################################################################################
+
+staged_transition_factory <- function(
+	stage_name_from,
+	stage_name_to,
+	model,
+	where = .GlobalEnv
+) {
+
+	transition_method <- setMethod(
+		f = "transition",
+		signature = signature(
+			.Object = paste(stage_name_from, "size_distribution", sep='_'),
+			covariates = "list"
+		),
+		definition = function(.Object, covariates) {
+			## First keep copy:
+			.ObjectA <- .Object
+
+			## Calculate the proportion which transition
+			S <- diag(.Object@n_bins)
+			newdata <- data.frame(
+				row = 1:(.Object@n_bins),
+				sizes = .Object@midpoints
+			)
+			for ( nom in names(covariates) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- covariates[[nom]]
+			}
+			diag(S) <- model$predict(newdata = newdata)
+
+			## Calculate density/count of remaining:
+			.ObjectA@sizes <- as.vector((1-S) %*% .Object@sizes)
+
+			## Calculate density/count of transitioning:
+			.Object@stage_name <- stage_name_to
+			.Object@sizes <- as.vector((  S) %*% .Object@sizes)
+
+			
+			return(list(.ObjectA,.Object))
+		}
+	)
+
+	return(transition)
+}
+
+################################################################################
+### Static methods for projecting size_distributions.
 ################################################################################
 
 setMethod(
@@ -256,38 +385,6 @@ setMethod(
 		return(.Object)
 	}
 )
-
-
-################################################################################
-## Smolting method:  really cut/paste from survival (?), and it needs to
-## be a factory function..., ditto for aging.
-################################################################################
-
-setMethod(
-	f = "smolting",
-	signature = signature(
-		.Object = "size_distribution",
-		model = "pGLM",
-		covariates = "list"
-	),
-	definition = function(.Object, model, covariates) {
-		S <- diag(.Object@n_bins)
-		newdata <- data.frame(
-			row = 1:(.Object@n_bins),
-		)
-		for ( nom in names(covariates) ) {
-			### Relies on recycling to get the right number of entries:
-			newdata[[nom]] <- covariates[[nom]]
-		}
-		diag(S) <- model$predict(newdata = newdata)
-		.Object@sizes <- as.vector(S %*% .Object@sizes)
-		return(.Object)
-	}
-)
-	
-
-################################################################################
-################################################################################
 
 
 setMethod(
@@ -453,20 +550,4 @@ setMethod(
 	}
 )
 
-################################################################################
-################################################################################
-
-
-setMethod(
-	f = "pool",
-	signature = signature("size_distribution"),
-	definition = function(...) {
-		dots = list(...)
-		szs = sapply(X=dots, FUN=function(x) x@sizes)
-		szs <- apply(szs, 1, sum)
-		o <- dots[[1]]
-		o@sizes <- szs
-		return(o)
-	}
-)
 

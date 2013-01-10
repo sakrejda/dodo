@@ -117,19 +117,19 @@ setMethod(
 		.Object = "life_cycle",
 		node = "character",
 		type = "character",
-		model = "pGLM"
+		model = "function"
 	),
 	definition = function(.Object, node, type, model) {
 		if (!(node %in% names(.Object@graph@nodeData))) {
 			.Object@graph <- nodeDataDefaults(
 				self = .Object@graph,
-				attr = paste('pGLM', type, sep='_')
-			) <- new('pGLM')
+				attr = paste('F', type, sep='_')
+			) <- function() {return(NULL)}
 		}
 		nodeData(
 			self = .Object@graph,
 			n = n,
-			attr = paste('pGLM', type, sep = '_')
+			attr = paste('F', type, sep = '_')
 		) <- model
 		return(.Object)
 	}
@@ -144,7 +144,7 @@ setMethod(
 	),
 	definition = function(.Object, node, type) {
 		o <- nodeData( self = .Object@graph, n = node, 
-			attr = paste('pGLM', type, sep='_'))
+			attr = paste('F', type, sep='_'))
 		return(o)
 	}
 )
@@ -157,21 +157,21 @@ setMethod(
 		from = "character",
 		to = "character",
 		type = "character",
-		model = "pGLM"
+		model = "function"
 	),
 	definition = function(.Object, from, to, type, model) {
 		edge_name <- paste("from","to",sep="|")
 		if (!(edge_name %in% names(.Object@graph@edgeData))) {
 			.Object@graph <- edgeDataDefaults(
 				self = .Object@graph,
-				attr = paste('pGLM', type, sep='_')
-			) <- new('pGLM')
+				attr = paste('F', type, sep='_')
+			) <- function() {return(NULL)}
 		}
 		edgeData(
 			self = .Object@graph,
 			from = from,
 			to = to,
-			attr = paste('pGLM', type, sep = '_')
+			attr = paste('F', type, sep = '_')
 		) <- model
 		return(.Object)
 	}
@@ -189,7 +189,7 @@ setMethod(
 		o <- edgeData( self = .Object@graph, 
 			from = from,
 			to = to,
-			attr = paste('pGLM', type, sep='_'))
+			attr = paste('F', type, sep='_'))
 		return(o)
 	}
 )
