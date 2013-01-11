@@ -202,14 +202,9 @@ staged_transition_factory <- function(
 	where = .GlobalEnv
 ) {
 
-	transition_method <- setMethod(
-		f = "transition",
-		signature = signature(
-			.Object = paste(stage_name_from, "size_distribution", sep='_'),
-			covariates = "list"
-		),
-		definition = function(.Object, covariates) {
-			## First keep copy:
+	transition_function <- function(.Object, covariates) {
+			## First keep copy, transition will be from .ObjectA to .Object,
+		  ## leftovers in .ObjectA:
 			.ObjectA <- .Object
 
 			## Calculate the proportion which transition
@@ -233,10 +228,9 @@ staged_transition_factory <- function(
 
 			
 			return(list(.ObjectA,.Object))
-		}
-	)
+	}
 
-	return(transition)
+	return(transition_function)
 }
 
 ################################################################################
