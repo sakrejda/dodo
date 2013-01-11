@@ -138,41 +138,6 @@ staged_size_distribution <- function(
 
 
 ################################################################################
-### Staged survival method factory, takes stage_name, pGLM, env
-################################################################################
-
-staged_survival_factory <- function(
-	stage_name,
-	model,
-	where = .GlobalEnv
-) {
-
-	survival_method <- setMethod(
-		f = "survival",
-		signature = signature(
-			.Object = paste(stage_name, "size_distribution", sep='_'),
-			covariates = "list"
-		),
-		definition = function(.Object, covariates) {
-			S <- diag(.Object@n_bins)
-			newdata <- data.frame(
-				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints
-			)
-			for ( nom in names(covariates) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- covariates[[nom]]
-			}
-			diag(S) <- model$predict(newdata = newdata)
-			.Object@sizes <- as.vector(S %*% .Object@sizes)
-			return(.Object)
-		}
-	)
-
-	return(survival)
-}
-
-################################################################################
 ### Staged growth method factory, takes stage_name, pGLM, env
 ################################################################################
 
@@ -182,13 +147,7 @@ staged_growth_factory <- function(
 	where = .GlobalEnv
 ) {
 
-	survival_method <- setMethod(
-		f = "growth",
-		signature = signature(
-			.Object = paste(stage_name, "size_distribution", sep='_'),
-			covariates = "list"
-		),
-		definition = function(.Object, covariates) {
+	growth_function <- function(.Object, covariates) {
 			newdata <- data.frame(
 				row = 1:(.Object@n_bins)
 			)
@@ -227,10 +186,9 @@ staged_growth_factory <- function(
 			.Object@sizes <- as.vector(S %*% .Object@sizes)
 			return(.Object)
 	
-		}
-	)
+	}
 
-	return(growth)
+	return(growth_function)
 }
 
 ################################################################################
