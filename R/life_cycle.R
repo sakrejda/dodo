@@ -7,14 +7,16 @@ life_cycle <- setClass(
 		stage_data = "data.frame",
 		parent_data = "data.frame",
 		adjMatrix = "Matrix",
-		stages = "environment"
+		stages = "environment",
+		transformation_order = "data.frame"
 	),
 	prototype = prototype(
 		graph = graphNEL(),
 		stage_data = data.frame(),
 		parent_data = data.frame(),
 		adjMatrix = Matrix(),
-		stages = new.env()
+		stages = new.env(),
+		transformation_order = data.frame()
 	),
 	validity = function(object) {
 		# Write fail conditions which return(FALSE)
@@ -120,15 +122,16 @@ setMethod(
 		model = "function"
 	),
 	definition = function(.Object, node, type, model) {
-		if (!(node %in% names(.Object@graph@nodeData))) {
-			.Object@graph <- nodeDataDefaults(
+		current_nodeData <- names(.Object@graph@nodeData)
+		if (is.null(current_nodeData) || !(node %in% current_nodeData)) {
+			nodeDataDefaults(
 				self = .Object@graph,
 				attr = paste('F', type, sep='_')
 			) <- function() {return(NULL)}
 		}
 		nodeData(
 			self = .Object@graph,
-			n = n,
+			n = node,
 			attr = paste('F', type, sep = '_')
 		) <- model
 		return(.Object)
@@ -143,8 +146,8 @@ setMethod(
 		type = "character"
 	),
 	definition = function(.Object, node, type) {
-		o <- nodeData( self = .Object@graph, n = node, 
-			attr = paste('F', type, sep='_'))
+		a <- paste('F', type, sep='_')
+		o <- nodeData(self=.Object@graph, n=node, attr=a)[[node]]
 		return(o)
 	}
 )
@@ -162,7 +165,7 @@ setMethod(
 	definition = function(.Object, from, to, type, model) {
 		edge_name <- paste("from","to",sep="|")
 		if (!(edge_name %in% names(.Object@graph@edgeData))) {
-			.Object@graph <- edgeDataDefaults(
+			edgeDataDefaults(
 				self = .Object@graph,
 				attr = paste('F', type, sep='_')
 			) <- function() {return(NULL)}
@@ -186,10 +189,11 @@ setMethod(
 		type = "character"
 	),
 	definition = function(.Object, from, to, type) {
+		e <- paste(from,to,sep='|')
 		o <- edgeData( self = .Object@graph, 
 			from = from,
 			to = to,
-			attr = paste('F', type, sep='_'))
+			attr = paste('F', type, sep='_'))[[e]]
 		return(o)
 	}
 )

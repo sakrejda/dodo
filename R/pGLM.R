@@ -1,26 +1,3 @@
-#  definition = function(
-#    .Object, model, covariates,
-#    coefficients, sigma, inverse_link
-#  ) {
-#    S <- diag(.Object@n_bins)
-#    newdata <- data.frame(
-#      row = 1:(.Object@n_bins),
-#      sizes = .Object@midpoints
-#    )
-#    for ( nom in names(covariates) ) {
-#      ### Relies on recycling to get the right number of entries:
-#      newdata[[nom]] <- covariates[[nom]]
-#    }
-#    mf <- model.frame(formula = formula, data = newdata)
-#    diag(S) <- inverse_link(   # func passed as argument.
-#        model.matrix(mf) %*% coefficients +
-#        rnorm(nrow(mf),0,sigma)
-#    )
-#    .Object@sizes <- as.vector(S %*% .Object@sizes)
-#    return(.Object)
-#  }
-#
-
 setOldClass(Classes="family", prototype=gaussian())
 
 setRefClass(Class = "pGLM",
@@ -78,6 +55,7 @@ setRefClass(Class = "pGLM",
 				model_matrix(newdata, covariates, n)
 			if (ncol(.self$mm) == length(.self$coefficients)) {
 				pred <- .self$mm %*% coefficients + epsilon(n=n)
+				### Add inverse link function using $family field.
 			} else {
 				stop("Object not ready for predictions, model matrix not formed.\n\n")
 			}
