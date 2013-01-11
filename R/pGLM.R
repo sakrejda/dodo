@@ -55,6 +55,7 @@ setRefClass(Class = "pGLM",
 				model_matrix(newdata, covariates, n)
 			if (ncol(.self$mm) == length(.self$coefficients)) {
 				pred <- .self$mm %*% coefficients + epsilon(n=n)
+				pred <- family()$linkinv(pred)
 				### Add inverse link function using $family field.
 			} else {
 				stop("Object not ready for predictions, model matrix not formed.\n\n")
