@@ -9,5 +9,5 @@ Description: IPM (Ellner XXXX), implemented for Atlantic salmon through to smolt
 License: GPL
 Depends: Rcpp (>= 0.9.10), RBGL, Matrix, parallel
 LinkingTo: Rcpp, RcppArmadillo
-Collate: allGenerics.R pGLM.R size_distributions.R life_cycle.R populationClass.R graphicalMethods.R 
+Collate: allGenerics.R pGLM.R size_distributions.R size_distributionMethods.R life_cycle.R populationClass.R graphicalMethods.R 
 Packaged: 2013-01-03 14:46:09 UTC; krzysiek

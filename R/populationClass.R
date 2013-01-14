@@ -76,7 +76,7 @@ population <- setRefClass(
 			for (i in 1:nrow(trans)) {
 				sub_pops <<- mcmapply(
 					FUN = .self@tranform,
-					node = sapply(X=sub_pops, FUN=function(x) {x@stage_name})
+					node = sapply(X=sub_pops, FUN=function(x) {x@stage_name}),
 					sub_pop = sub_pops,
 					MoreArgs = list(
 						model = trans[['model']][i],

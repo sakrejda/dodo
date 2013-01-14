@@ -123,7 +123,7 @@ setMethod(
 setMethod(
 	f = "transformations",
 	signature = signature(.Object = "life_cycle", data = "missing", file = "character"),
-	definition = function(.Object, data) {
+	definition = function(.Object, file) {
 		info <- file.info(file)
 		if (is.na(info$size)) stop(paste("File/path at '", file, "' does not exist."))
 		if (info$isdir) stop(paste("path '", file, "' points to a directory."))

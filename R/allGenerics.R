@@ -27,6 +27,10 @@ setGeneric(name="stage_names",
 					 def=function(.Object)
 						 standardGeneric("stage_names"),
 						 valueClass = "character")
+setGeneric(name="transformations",
+					 def=function(.Object, data, file) 
+						 standardGeneric("transformations")
+					 )
 
 ## For size_distributions, returning same, or list of same (use union on
 ## valueClass?
@@ -65,3 +69,4 @@ setGeneric(name="pool",
 					 def=function(...)
 						 standardGeneric("pool")
 					 )
+
