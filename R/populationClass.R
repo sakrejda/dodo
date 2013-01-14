@@ -60,14 +60,18 @@ population <- setRefClass(
 			return(f(sub_pop, env[[node]]))
 		},
 		step = function() {								
-			env <<- mcmapply(
-				FUN = function(x,y) {
-					y$sizes <- x@sizes   ### Cache sizes for use by transformations
-					return(y)
-				},
-				x = sub_pops,
-				y = env
-			)
+#     THIS WAS WRONG:
+#			env <<- mcmapply(
+#				FUN = function(x,y) {
+#					y$sizes <- x@sizes   ### Cache sizes for use by transformations
+#					return(y)
+#				},
+#				x = sub_pops,
+#				y = env
+#			)
+#			In an IPM, the densities change, but the transformation is
+			#			calculated across all coordinates (midpoints) so that
+			#     doesn't matter!
 			trans <- transformations(.self@life_cycle)
 			for (i in 1:nrow(trans)) {
 				sub_pops <<- mcmapply(
@@ -79,6 +83,8 @@ population <- setRefClass(
 						env = env
 					)
 				)
+				if (any(lapply(sub_pops,length)>1)) 
+					sub_pops <<- unlist(sub_pops, recursive=FALSE, use.names=FALSE)
 			}
 		},
 		sync = function() {
