@@ -110,6 +110,36 @@ setMethod(
 	}
 )
 
+setMethod(
+	f = "transformations",
+	signature = signature(.Object = "life_cycle", data = "data.frame", file = "missing"),
+	definition = function(.Object, data) {
+		trans <- data[order(data[['order']]), c('order','model')]
+		.Object@transformation_order = trans
+		return(.Object)
+	}
+)
+
+setMethod(
+	f = "transformations",
+	signature = signature(.Object = "life_cycle", data = "missing", file = "character"),
+	definition = function(.Object, data) {
+		info <- file.info(file)
+		if (is.na(info$size)) stop(paste("File/path at '", file, "' does not exist."))
+		if (info$isdir) stop(paste("path '", file, "' points to a directory."))
+		.Object <- transformations(.Object, read.table(file))
+		return(.Object)
+	}
+)
+
+setMethod(
+	f = "transformations",
+	signature = signature(.Object="life_cycle", data="missing", file="missing"),
+	definition = function(.Object) {
+		return(.Object@transformation_order)
+	}
+)
+
 ###########################################################################
 ###########################################################################
 

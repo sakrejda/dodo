@@ -43,49 +43,43 @@ population <- setRefClass(
 				stop("Populations are not compatible.")
 			}
 		},
-		survive = function() {								
-			sub_pops <<- mclapply(
-				X = sub_pops, 
-				FUN = survival, 
-					model = life_cycle,
-					covariates = env
-			)
+		transform = function(node, model, sub_pop, env) {
+			## ONLY using node models, b/c the "model" string
+			## is related to whether we get back a single sub_pop,
+			## or a list of them to replace the original.  Then
+			## we have to conditionally unlist to get the flat list
+			## again.  from/to models not needed.
+			f <- get_lc_node_model(.self@life_cycle, node, model)
+
+			## A little awkward because there might be multiple
+			## instances of a particular stage in the sub_pops list,
+			## but they all use the same environment (if not, they
+			## ought to be a separate stage).  Will find out what
+			## sort of overhead this introduces, only relevant if the
+			## "env" list gets BIG:
+			return(f(sub_pop, env[[node]]))
 		},
-		grow = function() {							
+		step = function() {								
 			env <<- mcmapply(
 				FUN = function(x,y) {
-					y$sizes <- x@sizes   ### Cache sizes for use by other functions.
+					y$sizes <- x@sizes   ### Cache sizes for use by transformations
 					return(y)
 				},
 				x = sub_pops,
 				y = env
 			)
-			sub_pops <<- mclapply(
-				X = sub_pops, 
-				FUN = growth, 
-					model = life_cycle,
-					covariates = env
-			)
-		},
-		smolt = function() {   #### CAREFUL: this will split a single stage
-													 ####			     into two, it will be important
-													 ####					 in recombining them to avoid
-													 ####   			 creating nested lists.
-			sub_pops <<- unlist(mclapply(
-				X = sub_pops, 
-				FUN = smolting, 
-					model = life_cycle,
-					covariates = env
-			))
-		},
-		age = function() {		#### CAREFUL: this will change the identity of
-													####					each stage... should be ok...
-			sub_pops <<- mclapply(
-				X = sub_pops, 
-				FUN = aging, 
-					model = life_cycle,
-					covariates = env
-			)
+			trans <- transformations(.self@life_cycle)
+			for (i in 1:nrow(trans)) {
+				sub_pops <<- mcmapply(
+					FUN = .self@tranform,
+					node = sapply(X=sub_pops, FUN=function(x) {x@stage_name})
+					sub_pop = sub_pops,
+					MoreArgs = list(
+						model = trans[['model']][i],
+						env = env
+					)
+				)
+			}
 		},
 		sync = function() {
 			known_stages <- stage_names(.self$life_cycle)
