@@ -8,6 +8,7 @@ population <- setRefClass(
 	methods = list(
 		initialize = function(											### CONSTRUCTOR
 			stages = NULL, parents = NULL,
+			transformations = NULL,
 			life_cycle = NULL, sub_pops = NULL, ...
 		) {
 			if (is.null(stages) && is.null(parents) && 
@@ -22,6 +23,10 @@ population <- setRefClass(
 					msg <- "Life cycle must be specified as parents/stages or object."
 					stop(msg)
 				}
+			}
+
+			if (!is.null(transformations)) {
+				life_cycle <<- transformations(lc, transformations)
 			}
 
 			if (is.null(sub_pops)) {

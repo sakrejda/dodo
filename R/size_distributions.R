@@ -31,6 +31,7 @@ setMethod(
 	),
 	definition = function(
 			.Object, 
+			Object_ = FALSE,
 			seed_sample = rnorm(100), 
 			n_bins = length(seed_sample)/10, 
 			limits = c(
@@ -39,20 +40,29 @@ setMethod(
 			),
 			bw=as.integer(length(seed_sample)/15)+1
 	) {
-		.Object@sizes = vector(mode="numeric", length=n_bins)
-		.Object@n_bins = n_bins
-		.Object@limits = limits
-		h <- (limits[['max']] - limits[['min']]) / n_bins
-		.Object@midpoints = limits[['min']] + ((1:n_bins)-0.5) * h
-		estimator <- function(x, seed, bw) {
-			1/(length(seed)*bw) * sum(dnorm(x=x, mean=seed, sd=1))
+		if (is(Object_,"size_distribution")) {
+			.Object@sizes 		= Object_@sizes
+			.Object@n_bins 		= Object_@n_bins
+			.Object@limits 		= Object_@limits
+			.Object@midpoints = Object_@midpoints
+
+		} else {
+
+			.Object@sizes = vector(mode="numeric", length=n_bins)
+			.Object@n_bins = n_bins
+			.Object@limits = limits
+			h <- (limits[['max']] - limits[['min']]) / n_bins
+			.Object@midpoints = limits[['min']] + ((1:n_bins)-0.5) * h
+			estimator <- function(x, seed, bw) {
+				1/(length(seed)*bw) * sum(dnorm(x=x, mean=seed, sd=1))
+			}
+			.Object@sizes = sapply(
+				X=.Object@midpoints, 
+				FUN=estimator,
+				seed=seed_sample, bw=bw
+			)
+			.Object@sizes <- length(seed_sample) * (.Object@sizes/sum(.Object@sizes))
 		}
-		.Object@sizes = sapply(
-			X=.Object@midpoints, 
-			FUN=estimator,
-			seed=seed_sample, bw=bw
-		)
-		.Object@sizes <- length(seed_sample) * (.Object@sizes/sum(.Object@sizes))
   	return(.Object)
 	}
 )
@@ -120,6 +130,7 @@ staged_size_distribution <- function(
 		),
 		definition = function(
 				.Object, 
+				Object_ = FALSE,
 				seed_sample = rnorm(100), 
 				n_bins = length(seed_sample)/10, 
 				limits = c(
@@ -128,7 +139,14 @@ staged_size_distribution <- function(
 				),
 				bw=as.integer(length(seed_sample)/15)+1
 		) {
-			.Object <- callNextMethod()
+			.Object <- callNextMethod(
+				.Object = .Object,
+				Object_ = Object_,
+				seed_sample = seed_sample,
+				n_bins = n_bins,
+				limits = limits,
+				bw = bw
+			)
 	  	return(.Object)
 		},
 		where = where
@@ -201,10 +219,15 @@ staged_transition_factory <- function(
 	model,
 	where = .GlobalEnv
 ) {
+	model
 
 	transition_function <- function(.Object, covariates) {
-			## First keep copy, transition will be from .ObjectA to .Object,
+			## First keep copy, transition will be from .ObjectA to .ObjectB,
 		  ## leftovers in .ObjectA:
+			.ObjectB <- new(
+				paste(stage_name_to,'size_distribution',sep='_'),
+				.Object
+			)
 			.ObjectA <- .Object
 
 			## Calculate the proportion which transition
@@ -218,18 +241,110 @@ staged_transition_factory <- function(
 				newdata[[nom]] <- covariates[[nom]]
 			}
 			diag(S) <- model$predict(newdata = newdata)
+			eye <- diag(rep(1,nrow(S)))
 
 			## Calculate density/count of remaining:
-			.ObjectA@sizes <- as.vector((1-S) %*% .Object@sizes)
+			.ObjectA@sizes <- as.vector((eye-S) %*% .Object@sizes)
 
 			## Calculate density/count of transitioning:
-			.Object@stage_name <- stage_name_to
-			.Object@sizes <- as.vector((  S) %*% .Object@sizes)
+			.ObjectB@sizes <- as.vector((  S) %*% .Object@sizes)
 
 			
-			return(list(.ObjectA,.Object))
+			return(list(.ObjectA,.ObjectB))
 	}
 
 	return(transition_function)
 }
 
+################################################################################
+### Staged growth/"survival" method factory, takes stage_name, pGLM, env
+################################################################################
+
+staged_transformition_factory <- function(
+	stage_name_from,
+	stage_name_to,
+	growth_model,
+	transition_model,
+	scaling_model,
+	where = .GlobalEnv
+) {
+
+	transformition_function <- function(.Object, covariates) {
+			newdata <- data.frame(
+				row = 1:(.Object@n_bins)
+			)
+			for ( nom in names(covariates) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- covariates[[nom]]
+			}
+			## Calculate means:
+			mu <- mapply(
+				FUN = function(size, newdata) {
+					newdata[['sizes']] <- size
+					mu <- model$predict(newdata = newdata)
+				},
+				size = .Object@midpoints,
+				MoreArgs = list(newdata=newdata)
+			)
+	
+			## Apply error:
+			S <- mapply(
+				FUN = function(x,y, mod_sd) {
+					dnorm(x=y, mean=x, sd=mod_sd)
+				},
+				x = mu,
+				MoreArgs = list(
+					y = .Object@midpoints, 
+					mod_sd = sd(model$errors(1000))
+				)
+			)
+	
+			## Making sure that the transformation preserves mass:
+			S <- apply(
+				X=S, MARGIN=2, 
+				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
+	
+			## Transform:
+			.Object@sizes <- as.vector(S %*% .Object@sizes)
+
+			## First keep copy, transition will be from .ObjectA to .ObjectB,
+		  ## leftovers in .ObjectA:
+			.ObjectB <- new(
+				paste(stage_name_to,'size_distribution',sep='_'),
+				.Object
+			)
+			.ObjectA <- .Object
+
+			## Calculate the proportion which transition
+			S <- diag(.Object@n_bins)
+			newdata <- data.frame(
+				row = 1:(.Object@n_bins),
+				sizes = .Object@midpoints
+			)
+			for ( nom in names(covariates) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- covariates[[nom]]
+			}
+			diag(S) <- model$predict(newdata = newdata)
+			eye <- diag(rep(1,nrow(S)))
+
+			## Calculate density/count of remaining:
+			.ObjectA@sizes <- as.vector((eye-S) %*% .Object@sizes)
+
+			## Calculate density/count of transitioning:
+			.ObjectB@sizes <- as.vector((  S) %*% .Object@sizes)
+
+			
+			############# As a final step, .ObjectB is scaled by some model
+			### based multiplier here:
+
+			### Cool code goes here (in that ironic, code is never cool
+			### sense).
+
+
+			return(list(.ObjectA,.ObjectB))
+
+	}
+
+	return(transformition_function)
+}
