@@ -26,7 +26,7 @@ population <- setRefClass(
 			}
 
 			if (!is.null(transformations)) {
-				life_cycle <<- transformations(lc, transformations)
+				life_cycle <<- transformations(life_cycle, transformations)
 			}
 
 			if (is.null(sub_pops)) {
