@@ -164,6 +164,7 @@ staged_growth_factory <- function(
 	model,
 	where = .GlobalEnv
 ) {
+	model   ## Closure!
 
 	growth_function <- function(.Object, covariates) {
 			newdata <- data.frame(
@@ -219,7 +220,7 @@ staged_transition_factory <- function(
 	model,
 	where = .GlobalEnv
 ) {
-	model
+	model		## Closure!
 
 	transition_function <- function(.Object, covariates) {
 			## First keep copy, transition will be from .ObjectA to .ObjectB,
@@ -260,32 +261,54 @@ staged_transition_factory <- function(
 ### Staged growth/"survival" method factory, takes stage_name, pGLM, env
 ################################################################################
 
-staged_transformition_factory <- function(
+staged_reproduction_factory <- function(
 	stage_name_from,
 	stage_name_to,
-	growth_model,
-	transition_model,
-	scaling_model,
+	reproduction_model,
+	fecundity_model,
+	size_model,
 	where = .GlobalEnv
 ) {
 
-	transformition_function <- function(.Object, covariates) {
+	reproduction_model; fecundity_model; size_model     ## Closure!
+
+	reproduction_function <- function(.Object, covariates) {
+
+			## STEP 1: copy, .Object keeps its identity throughout and
+		  ## .ObjectN will be the new individuals.  
+			.ObjectN <- new(
+				paste(stage_name_to,'size_distribution',sep='_'),
+				.Object
+			)
+
+			## STEP 2: Produce the data frame from which covariates are drawn:
 			newdata <- data.frame(
-				row = 1:(.Object@n_bins)
+				row = 1:(.Object@n_bins),
+				sizes = .Object@midpoints
 			)
 			for ( nom in names(covariates) ) {
 				### Relies on recycling to get the right number of entries:
 				newdata[[nom]] <- covariates[[nom]]
 			}
+
+			### STEP 3: Calculate the proportion at each size class which will
+			### contribute through reproduction (zero inflation of fecundity).
+			R <- diag(.Object@n_bins)
+			diag(R) <- reproduction_model$predict(newdata = newdata)
+			.ObjectN@sizes <- as.vector(  R %*% .ObjectN@sizes)
+
+			
+			## STEP 4: Calculate how offspring from each size class will be
+			## represented in the final offspring population (fecundity).
+			F <- diag(.Object@n_bins)
+			diag(F) <- fecundity_model$predict(newdata = newdata)
+			.ObjectN@sizes <- as.vector(  F %*% .ObjectN@sizes)
+
+			## STEP 5: Calculate the final size distribution of offspring
+			## based on the parental size distribution (size model).
+
 			## Calculate means:
-			mu <- mapply(
-				FUN = function(size, newdata) {
-					newdata[['sizes']] <- size
-					mu <- model$predict(newdata = newdata)
-				},
-				size = .Object@midpoints,
-				MoreArgs = list(newdata=newdata)
-			)
+			mu <- size_model$predict(newdata = newdata)
 	
 			## Apply error:
 			S <- mapply(
@@ -294,8 +317,8 @@ staged_transformition_factory <- function(
 				},
 				x = mu,
 				MoreArgs = list(
-					y = .Object@midpoints, 
-					mod_sd = sd(model$errors(1000))
+					y = .ObjectN@midpoints, 
+					mod_sd = sd(size_model$errors(1000))
 				)
 			)
 	
@@ -305,46 +328,12 @@ staged_transformition_factory <- function(
 				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 	
 			## Transform:
-			.Object@sizes <- as.vector(S %*% .Object@sizes)
-
-			## First keep copy, transition will be from .ObjectA to .ObjectB,
-		  ## leftovers in .ObjectA:
-			.ObjectB <- new(
-				paste(stage_name_to,'size_distribution',sep='_'),
-				.Object
-			)
-			.ObjectA <- .Object
-
-			## Calculate the proportion which transition
-			S <- diag(.Object@n_bins)
-			newdata <- data.frame(
-				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints
-			)
-			for ( nom in names(covariates) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- covariates[[nom]]
-			}
-			diag(S) <- model$predict(newdata = newdata)
-			eye <- diag(rep(1,nrow(S)))
-
-			## Calculate density/count of remaining:
-			.ObjectA@sizes <- as.vector((eye-S) %*% .Object@sizes)
-
-			## Calculate density/count of transitioning:
-			.ObjectB@sizes <- as.vector((  S) %*% .Object@sizes)
-
-			
-			############# As a final step, .ObjectB is scaled by some model
-			### based multiplier here:
-
-			### Cool code goes here (in that ironic, code is never cool
-			### sense).
+			.ObjectN@sizes <- as.vector(S %*% .ObjectN@sizes)
 
 
-			return(list(.ObjectA,.ObjectB))
+			return(list(.Object,.ObjectN))
 
 	}
 
-	return(transformition_function)
+	return(reproduction_function)
 }
