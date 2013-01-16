@@ -83,7 +83,7 @@ population <- setRefClass(
 			trans <- get_transformations(.self$life_cycle)
 			for (i in 1:nrow(trans)) {
 				sub_pops <<- mcmapply(
-					FUN = .self@tranform,
+					FUN = .self$transform,
 					node = sapply(X=sub_pops, FUN=function(x) {x@stage_name}),
 					sub_pop = sub_pops,
 					MoreArgs = list(
