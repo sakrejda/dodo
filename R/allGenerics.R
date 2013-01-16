@@ -27,9 +27,9 @@ setGeneric(name="stage_names",
 					 def=function(.Object)
 						 standardGeneric("stage_names"),
 						 valueClass = "character")
-setGeneric(name="transformations",
+setGeneric(name="add_transformations",
 					 def=function(.Object, data, file) 
-						 standardGeneric("transformations")
+						 standardGeneric("add_transformations")
 					 )
 
 ## For size_distributions, returning same, or list of same (use union on

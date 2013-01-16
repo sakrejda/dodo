@@ -81,7 +81,7 @@ setMethod(
 )
 
 setMethod(
-	f = "transformations",
+	f = "add_transformations",
 	signature = signature(.Object = "life_cycle", data = "data.frame", file = "missing"),
 	definition = function(.Object, data) {
 		trans <- data[order(data[['order']]), c('order','model')]
@@ -91,7 +91,7 @@ setMethod(
 )
 
 setMethod(
-	f = "transformations",
+	f = "add_transformations",
 	signature = signature(.Object = "life_cycle", data = "missing", file = "character"),
 	definition = function(.Object, file) {
 		info <- file.info(file)
@@ -103,7 +103,7 @@ setMethod(
 )
 
 setMethod(
-	f = "transformations",
+	f = "add_transformations",
 	signature = signature(.Object="life_cycle", data="missing", file="missing"),
 	definition = function(.Object) {
 		return(.Object@transformation_order)
