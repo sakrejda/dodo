@@ -97,7 +97,7 @@ setMethod(
 		info <- file.info(file)
 		if (is.na(info$size)) stop(paste("File/path at '", file, "' does not exist."))
 		if (info$isdir) stop(paste("path '", file, "' points to a directory."))
-		.Object <- transformations(.Object, read.table(file))
+		.Object <- add_transformations(.Object, read.table(file))
 		return(.Object)
 	}
 )
