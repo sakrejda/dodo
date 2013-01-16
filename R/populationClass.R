@@ -48,6 +48,9 @@ population <- setRefClass(
 				stop("Populations are not compatible.")
 			}
 		},
+		add_model = function(stage, transformation, model) {
+			life_cycle <<- add_lc_node_model(life_cycle, stage, transformation, model)
+		},
 		transform = function(node, model, sub_pop, env) {
 			## ONLY using node models, b/c the "model" string
 			## is related to whether we get back a single sub_pop,
