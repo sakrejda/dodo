@@ -99,7 +99,7 @@ population <- setRefClass(
 						model = trans[['model']][i],
 						env = env
 					),
-					simplify = FALSE
+					SIMPLIFY = FALSE
 				)
 				if (any(lapply(sub_pops,length)>1)) 
 					sub_pops <<- unlist(sub_pops, recursive=FALSE, use.names=FALSE)
