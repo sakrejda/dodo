@@ -31,6 +31,10 @@ setGeneric(name="add_transformations",
 					 def=function(.Object, data, file) 
 						 standardGeneric("add_transformations")
 					 )
+setGeneric(name="get_transformations",
+					 def=function(.Object, stage, type) 
+						 standardGeneric("get_transformations")
+					 )
 
 ## For size_distributions, returning same, or list of same (use union on
 ## valueClass?

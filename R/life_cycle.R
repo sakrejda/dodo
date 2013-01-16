@@ -103,8 +103,8 @@ setMethod(
 )
 
 setMethod(
-	f = "add_transformations",
-	signature = signature(.Object="life_cycle", data="missing", file="missing"),
+	f = "get_transformations",
+	signature = signature(.Object="life_cycle", stage="missing", type="missing"),
 	definition = function(.Object) {
 		return(.Object@transformation_order)
 	}
@@ -122,17 +122,20 @@ setMethod(
 		model = "function"
 	),
 	definition = function(.Object, node, type, model) {
-		current_nodeData <- names(.Object@graph@nodeData)
-		if (is.null(current_nodeData) || !(node %in% current_nodeData)) {
+		current_nodes <- names(.Object@graph@nodeData@data)
+		current_types <- names(.Object@graph@nodeData@defaults)
+		attr <- paste('F', type, sep='_')
+		if (is.null(current_nodes) || !(node %in% current_nodes ) ||
+				is.null(current_types) || !(attr %in% current_types)) {
 			nodeDataDefaults(
 				self = .Object@graph,
-				attr = paste('F', type, sep='_')
+				attr = attr 
 			) <- function() {return(NULL)}
 		}
 		nodeData(
 			self = .Object@graph,
 			n = node,
-			attr = paste('F', type, sep = '_')
+			attr = attr
 		) <- model
 		return(.Object)
 	}
