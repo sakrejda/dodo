@@ -80,7 +80,7 @@ population <- setRefClass(
 #			In an IPM, the densities change, but the transformation is
 			#			calculated across all coordinates (midpoints) so that
 			#     doesn't matter!
-			trans <- transformations(.self@life_cycle)
+			trans <- get_transformations(.self@life_cycle)
 			for (i in 1:nrow(trans)) {
 				sub_pops <<- mcmapply(
 					FUN = .self@tranform,
