@@ -168,21 +168,15 @@ staged_growth_factory <- function(
 
 	growth_function <- function(.Object, covariates) {
 			newdata <- data.frame(
-				row = 1:(.Object@n_bins)
+				row = 1:(.Object@n_bins),
+				sizes = .Object@midpoints
 			)
 			for ( nom in names(covariates) ) {
 				### Relies on recycling to get the right number of entries:
 				newdata[[nom]] <- covariates[[nom]]
 			}
 			## Calculate means:
-			mu <- mapply(
-				FUN = function(size, newdata) {
-					newdata[['sizes']] <- size
-					mu <- model$predict(newdata = newdata)
-				},
-				size = .Object@midpoints,
-				MoreArgs = list(newdata=newdata)
-			)
+			mu <- model$predict(newdata = newdata)
 	
 			## Apply error:
 			S <- mapply(

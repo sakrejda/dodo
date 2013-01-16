@@ -85,7 +85,7 @@ population <- setRefClass(
 
 			trans <- get_transformations(.self$life_cycle)
 			for (i in 1:nrow(trans)) {
-
+				print(trans[['model']][i])
 				## This next part is inefficient because some sub_pops don't
 				## have a particular transformation (e.g.-juveniles don't
 				## reproduce), so maybe the life_cycle object could be convinced
