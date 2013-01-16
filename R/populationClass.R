@@ -58,14 +58,16 @@ population <- setRefClass(
 			## we have to conditionally unlist to get the flat list
 			## again.  from/to models not needed.
 			f <- get_lc_node_model(.self$life_cycle, node, model)
-
+			
 			## A little awkward because there might be multiple
 			## instances of a particular stage in the sub_pops list,
 			## but they all use the same environment (if not, they
 			## ought to be a separate stage).  Will find out what
 			## sort of overhead this introduces, only relevant if the
 			## "env" list gets BIG:
-			return(f(sub_pop, env[[node]]))
+			if (is.function(f)) {
+				return(f(sub_pop, env[[node]]))
+			} else return(sub_pop)
 		},
 		step = function() {								
 #     THIS WAS WRONG:
@@ -78,10 +80,17 @@ population <- setRefClass(
 #				y = env
 #			)
 #			In an IPM, the densities change, but the transformation is
-			#			calculated across all coordinates (midpoints) so that
-			#     doesn't matter!
+#			calculated across all coordinates (midpoints) so that
+#     doesn't matter!
+
 			trans <- get_transformations(.self$life_cycle)
 			for (i in 1:nrow(trans)) {
+
+				## This next part is inefficient because some sub_pops don't
+				## have a particular transformation (e.g.-juveniles don't
+				## reproduce), so maybe the life_cycle object could be convinced
+				## to efficiently cough up a list of calls if it becomes a
+				## problem...
 				sub_pops <<- mcmapply(
 					FUN = .self$transform,
 					node = sapply(X=sub_pops, FUN=function(x) {x@stage_name}),

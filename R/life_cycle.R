@@ -130,7 +130,7 @@ setMethod(
 			nodeDataDefaults(
 				self = .Object@graph,
 				attr = attr 
-			) <- function() {return(NULL)}
+			) <- FALSE
 		}
 		nodeData(
 			self = .Object@graph,
@@ -171,7 +171,7 @@ setMethod(
 			edgeDataDefaults(
 				self = .Object@graph,
 				attr = paste('F', type, sep='_')
-			) <- function() {return(NULL)}
+			) <- FALSE
 		}
 		edgeData(
 			self = .Object@graph,
