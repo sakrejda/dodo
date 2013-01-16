@@ -57,7 +57,7 @@ population <- setRefClass(
 			## or a list of them to replace the original.  Then
 			## we have to conditionally unlist to get the flat list
 			## again.  from/to models not needed.
-			f <- get_lc_node_model(.self@life_cycle, node, model)
+			f <- get_lc_node_model(.self$life_cycle, node, model)
 
 			## A little awkward because there might be multiple
 			## instances of a particular stage in the sub_pops list,
