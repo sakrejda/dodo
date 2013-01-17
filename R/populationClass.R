@@ -1,3 +1,31 @@
+path_helper <- function(path, timestamp) {
+		ts <- paste(strsplit(x=date(), split=' ')[[1]], sep='_', collapse='_')
+		if (is.null(path)) stop("Target file or directory must be supplied.")
+		if (file.exists(path)) {
+			fi <- file.info(path)
+			if (fi$isdir) {
+				pattern <- 'pops-'
+				if (timestamp) {
+					pattern <- paste(pattern, ts, sep='')
+				}
+				target <- tempfile(pattern=paste(pattern,'-',sep=''), tmpdir=path, fileext='.rds')
+			} else {
+				stop("Target file already exists.")		
+			}
+		} else {
+			target <- path
+			if (timestamp) {
+				target <- strsplit(x=target, split='.', fixed=TRUE)[[1]]
+				if (length(target) > 1) {
+					target <- paste(target[1],ts,paste(target[2:length(target)], collapse='-'),sep='-') 
+				} else {
+					target <- paste(target,ts,sep='-')
+				}
+			}
+		}
+		return(target)
+}
+
 population <- setRefClass(
 	Class = "population",
 	fields = list(
@@ -69,7 +97,7 @@ population <- setRefClass(
 				return(f(sub_pop, env[[node]]))
 			} else return(sub_pop)
 		},
-		step = function() {								
+		step = function(synchronize=TRUE) {								
 #     THIS WAS WRONG:
 #			env <<- mcmapply(
 #				FUN = function(x,y) {
@@ -106,6 +134,7 @@ population <- setRefClass(
 				if (any(lapply(sub_pops,length)>1)) 
 					sub_pops <<- unlist(sub_pops, recursive=FALSE, use.names=FALSE)
 			}
+			if (synchronize) sync()
 		},
 		sync = function() {
 			known_stages <- stage_names(.self$life_cycle)
@@ -116,6 +145,18 @@ population <- setRefClass(
 				o <- c(o,do.call(what=pool, args=sub_pops[ present_stages %in% stage ]))
 			}
 			sub_pops <<- o
+		},
+		clear = function() {
+			sub_pops <<- list()
+		},
+		save_populations = function(path = NULL, timestamp=TRUE) {
+			target <- path_helper(path, timestamp)
+			saveRDS(object=sub_pops, file=target)
+		},
+		save = function(path = NULL, timestamp=TRUE) {
+			target <- path_helper(path, timestamp)
+			target <- paste('complete',target,sep='-')
+			saveRDS(object=.self, file=target)
 		}
 	)
 )

@@ -72,7 +72,8 @@ setRefClass(Class = "pGLM",
 			model_matrix(newdata, covariates, n)
 			mo <- model.offset(mf)
 			if (ncol(.self$mm) == length(.self$coefficients[,draw])) {
-				pred <- .self$mm %*% coefficients[,draw] + epsilon(n=nrow(.self$mm)) + mo
+				pred <- .self$mm %*% coefficients[,draw] + epsilon(n=nrow(.self$mm))
+				if (!is.null(mo)) pred <- pred + mo
 				pred <- family$linkinv(pred)
 				### Add inverse link function using $family field.
 			} else {
