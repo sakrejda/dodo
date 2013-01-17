@@ -70,8 +70,9 @@ setRefClass(Class = "pGLM",
 				draw <- sample(x=1:ncol(.self$coefficients), size=1)
 			}
 			model_matrix(newdata, covariates, n)
+			mo <- model.offset(mf)
 			if (ncol(.self$mm) == length(.self$coefficients[,draw])) {
-				pred <- .self$mm %*% coefficients[,draw] + epsilon(n=nrow(.self$mm))
+				pred <- .self$mm %*% coefficients[,draw] + epsilon(n=nrow(.self$mm)) + mo
 				pred <- family$linkinv(pred)
 				### Add inverse link function using $family field.
 			} else {
