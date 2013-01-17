@@ -26,7 +26,7 @@ setRefClass(Class = "pGLM",
 			family 				<<- family
 
 			nc <- length(coefficients)
-			coef_tmp <- matrix(unlist(coefficients), nrow=length(nc), byrow=TRUE)
+			coef_tmp <- matrix(unlist(coefficients), nrow=nc, byrow=TRUE)
 			rownames(coef_tmp) <- names(coefficients)
 			coefficients 	<<- coef_tmp
 

@@ -101,6 +101,8 @@ population <- setRefClass(
 					),
 					SIMPLIFY = FALSE
 				)
+				if (any(sapply(sub_pops,is.character)) )
+						stop("Check sub populations, prediction failed.")
 				if (any(lapply(sub_pops,length)>1)) 
 					sub_pops <<- unlist(sub_pops, recursive=FALSE, use.names=FALSE)
 			}
