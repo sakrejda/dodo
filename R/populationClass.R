@@ -155,7 +155,6 @@ population <- setRefClass(
 		},
 		save = function(path = NULL, timestamp=TRUE) {
 			target <- path_helper(path, timestamp)
-			target <- paste('complete',target,sep='-')
 			saveRDS(object=.self, file=target)
 		}
 	)

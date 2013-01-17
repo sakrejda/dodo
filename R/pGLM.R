@@ -54,8 +54,45 @@ setRefClass(Class = "pGLM",
 		      new_data[[nom]] <- covariates[[nom]]
 		    }
 			} 
+			## Make model frame and model matrix
 			mf <<- model.frame(formula = formula, data = new_data)
 			mm <<- model.matrix(object = formula, data = mf)
+
+			## Reorder coefficients matrix to match the model matrix...
+			m_coef_to_mm <- match(x=rownames(coefficients), table=colnames(mm))
+			if (any(is.na(m_coef_to_mm))) { 
+				missing <- rownames(coefficients)[is.na(m_coef_to_mm)]
+				msg <- paste("Model matrix columns for some coefficients ",
+										 "missing:\n ", missing, "\n", collapse=", ", sep='')
+				stop(msg)
+			}
+			m_mm_to_coef <- match(x=colnames(mm), rownames(coefficients))
+			if (any(is.na(m_mm_to_coef))) { 
+				missing <- colnames(mm)[is.na(m_mm_to_coef)]
+				msg <- paste("Coefficients for some model matrix columns ",
+										 "missing:\n ", missing, "\n", collapse=", ", sep='')
+				stop(msg)
+			}
+			## Deal with gratuitous type conversions:
+			nc <- ncol(coefficients)
+			nr <- nrow(coefficients)
+			rn <- rownames(coefficients)
+			cn <- colnames(coefficients)
+			coef_tmp <- coefficients[m_coef_to_mm,]
+			if ((nc>1) && (nr>1)) {
+				coefficients <<- coef_tmp
+			} else if ((nr>1) && (nc==1)) {
+				coef_tmp <- matrix(coef_tmp,nrow=nr)
+				rownames(coef_tmp) <- rn
+				colnames(coef_tmp) <- cn
+				coefficients <<- coef_tmp
+			} else if ((nr==1) && (nc>1)) {
+				coef_tmp <- matrix(coef_tmp,ncol=nc)
+				rownames(coef_tmp) <- rn
+				colnames(coef_tmp) <- cn
+				coefficients <<- coef_tmp
+			}
+			
 		},
 		predict = function(
 			newdata = NULL, 
