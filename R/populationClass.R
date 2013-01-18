@@ -113,7 +113,7 @@ population <- setRefClass(
 
 			trans <- get_transformations(.self$life_cycle)
 			for (i in 1:nrow(trans)) {
-				print(trans[['model']][i])
+##				print(trans[['model']][i])
 				## This next part is inefficient because some sub_pops don't
 				## have a particular transformation (e.g.-juveniles don't
 				## reproduce), so maybe the life_cycle object could be convinced
@@ -157,8 +157,69 @@ population <- setRefClass(
 			target <- path_helper(path, timestamp)
 			saveRDS(object=.self, file=target)
 		},
-		set_env = function(env) {
-			if
+		set_env = function(e) {
+			if (is.environment(e)) {
+				o <- replicate(n=length(env), expr=e)
+				names(o) <- names(env)
+				env <<- o
+				return(env)
+			} else if (is.list(e)) {
+				## Single element list:
+				if (!any(sapply(e,is.list))) {
+					o <- replicate(n=length(env), expr=as.environment(e))
+					names(o) <- names(env)
+					env <<- o
+					return(env)
+				}
+				all_elements <- !any(is.na(match(x=names(e), table=names(env))))
+				if (!all_elements) { 
+					stop("Some elements of 'env' not defined in argument 'e'.")
+				}
+				all_environments <- all(sapply(e,is.environment))
+				all_lists <- all(sapply(e,is.list()))
+				if (!all_environments && !all_lists) {
+					stop("Not all elements of argument 'e' are environments.")
+				}
+				## List of environments:
+				if (all_environments) {
+					env <<- e
+					return(env)
+				}
+				## List of lists:
+				if (all_lists) {
+					e <- lapply(e,as.environment())
+					env <<- e
+					return(env)
+				}
+			}
+		},
+		run = function(e = new.env(), n = 1, o = NULL) {
+			## What to do with output:
+			if (!is.null(o)) o_type <- file.info(o)
+
+			## OMG R I love your type system!
+			is_env <- is.environment(e)
+			is_list <- is.list(e) && !is.list(e[[1]])
+			if (!is_env && !is_list) {
+				env_list <- all(sapply(e),is.environment)
+				list_list <- all(sapply(e),is.list)
+			} else { env_list <- FALSE; list_list <- FALSE }
+
+			if (is_env || is_list) {
+				set_env(e)
+				for ( i in 1:n ) {
+					step()
+					if (!is.null(o) && o_type$isdir) save_populations(path=o)
+				}
+				if (!is.null(o)) save(path=o)
+			}
+
+			if (env_list || list_list) {
+				for ( i in 1:n ) {
+					set_env(e[[i]])
+					step()
+				}
+			}
 		}
 	)
 )
