@@ -156,6 +156,9 @@ population <- setRefClass(
 		save = function(path = NULL, timestamp=TRUE) {
 			target <- path_helper(path, timestamp)
 			saveRDS(object=.self, file=target)
+		},
+		set_env = function(env) {
+			if
 		}
 	)
 )
