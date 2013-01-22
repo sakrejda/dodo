@@ -93,7 +93,7 @@ setMethod(
 staged_size_distribution <- function(
 	stage_name,
 	stage, 
-	age,
+	traits,
 	where = .GlobalEnv
 ) { 
 	### This factory sets the derived class, sets its init method, then
@@ -107,13 +107,13 @@ staged_size_distribution <- function(
 			id = "character",
 			stage = "numeric",
 			stage_name = "character",
-			month = "numeric"
+			traits = "list"
 		),
 		prototype = prototype(
 			id = "",
 			stage = stage,
 			stage_name = stage_name,
-			age = age
+		  traits = traits
 		),
 		validity = function(object) {
 			# Write fails conditions which return(FALSE)
@@ -137,7 +137,8 @@ staged_size_distribution <- function(
 					min = min(seed_sample) - .1*(max(seed_sample)-min(seed_sample)),
 					max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
 				),
-				bw=as.integer(length(seed_sample)/15)+1
+				bw=as.integer(length(seed_sample)/15)+1,
+				traits=list()
 		) {
 			.Object <- callNextMethod(
 				.Object = .Object,
@@ -147,6 +148,7 @@ staged_size_distribution <- function(
 				limits = limits,
 				bw = bw
 			)
+			.Object@traits = traits
 	  	return(.Object)
 		},
 		where = where
@@ -174,6 +176,10 @@ staged_growth_factory <- function(
 			for ( nom in names(covariates) ) {
 				### Relies on recycling to get the right number of entries:
 				newdata[[nom]] <- covariates[[nom]]
+			}
+			for ( nom in names(.Object@traits) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- .Object@traits[[nom]]
 			}
 			## Calculate means:
 			mu <- model$predict(newdata = newdata)
@@ -235,6 +241,10 @@ staged_transition_factory <- function(
 				### Relies on recycling to get the right number of entries:
 				newdata[[nom]] <- covariates[[nom]]
 			}
+			for ( nom in names(.Object@traits) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- .Object@traits[[nom]]
+			}
 			diag(S) <- model$predict(newdata = newdata)
 			eye <- diag(rep(1,nrow(S)))
 
@@ -283,6 +293,10 @@ staged_reproduction_factory <- function(
 			for ( nom in names(covariates) ) {
 				### Relies on recycling to get the right number of entries:
 				newdata[[nom]] <- covariates[[nom]]
+			}
+			for ( nom in names(.Object@traits) ) {
+				### Relies on recycling to get the right number of entries:
+				newdata[[nom]] <- .Object@traits[[nom]]
 			}
 
 			### STEP 3: Calculate the proportion at each size class which will
