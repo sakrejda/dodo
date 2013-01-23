@@ -63,14 +63,14 @@ setRefClass(Class = "pGLM",
 			if (any(is.na(m_coef_to_mm))) { 
 				missing <- rownames(coefficients)[is.na(m_coef_to_mm)]
 				msg <- paste("Model matrix columns for some coefficients ",
-										 "missing:\n ", missing, "\n", collapse=", ", sep='')
+										 "missing:\n\tMissing columns for:\n\t\t", missing, "\n", collapse=", ", sep='')
 				stop(msg)
 			}
 			m_mm_to_coef <- match(x=colnames(mm), rownames(coefficients))
 			if (any(is.na(m_mm_to_coef))) { 
 				missing <- colnames(mm)[is.na(m_mm_to_coef)]
 				msg <- paste("Coefficients for some model matrix columns ",
-										 "missing:\n ", missing, "\n", collapse=", ", sep='')
+										 "missing:\n\tMissing coefficients for:\n\t\t", missing, "\n", collapse=", ", sep='')
 				stop(msg)
 			}
 			## Deal with gratuitous type conversions:

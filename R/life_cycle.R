@@ -60,7 +60,7 @@ setMethod(
 			FUN = staged_size_distribution,
 				stage_name = stages[['stage_name']],
 				stage = 1:nrow(stages),
-				age = stages[['age_in_months']],
+				traits = apply(X=stages, MARGIN=1, FUN=as.list),
 			MoreArgs = list(where = .Object@stages)
 		)
 		return(.Object)
