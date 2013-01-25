@@ -76,6 +76,11 @@ population <- setRefClass(
 				stop("Populations are not compatible.")
 			}
 		},
+		add = function(Class, args) {
+			all_args <- c(list(Class=Class), args)
+			new_pop <- do.call(what=new, args = all_args, envir=.self$life_cycle@stages)
+			sub_pops <<- c(.self$sub_pops, list(new_pop))
+		},
 		add_model = function(stage, transformation, model) {
 			life_cycle <<- add_lc_node_model(life_cycle, stage, transformation, model)
 		},

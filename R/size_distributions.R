@@ -5,13 +5,13 @@
 size_distribution <- setClass(
 	Class = "size_distribution",
 	representation = representation(
-		sizes = "numeric",
+		densities = "numeric",
 		n_bins = "numeric",
 		limits = "numeric",
 		midpoints = "numeric"
 	),
 	prototype = prototype(
-		sizes = vector(mode="numeric", length=0),
+		densities = vector(mode="numeric", length=0),
 		n_bins = 0,
 		limits = vector(mode="numeric", length=2),
 		midpoints = vector(mode="numeric", length=0)
@@ -38,17 +38,18 @@ setMethod(
 				min = min(seed_sample) - .1*(max(seed_sample)-min(seed_sample)),
 				max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
 			),
-			bw=as.integer(length(seed_sample)/15)+1
+			bw=as.integer(length(seed_sample)/15)+1,
+			density=NULL
 	) {
 		if (is(Object_,"size_distribution")) {
-			.Object@sizes 		= Object_@sizes
+			.Object@densities 		= Object_@densities
 			.Object@n_bins 		= Object_@n_bins
 			.Object@limits 		= Object_@limits
 			.Object@midpoints = Object_@midpoints
 
-		} else {
+		} else if (is.null(density)) {
 
-			.Object@sizes = vector(mode="numeric", length=n_bins)
+			.Object@densities = vector(mode="numeric", length=n_bins)
 			.Object@n_bins = n_bins
 			.Object@limits = limits
 			h <- (limits[['max']] - limits[['min']]) / n_bins
@@ -56,13 +57,25 @@ setMethod(
 			estimator <- function(x, seed, bw) {
 				1/(length(seed)*bw) * sum(dnorm(x=x, mean=seed, sd=1))
 			}
-			.Object@sizes = sapply(
+			.Object@densities = sapply(
 				X=.Object@midpoints, 
 				FUN=estimator,
 				seed=seed_sample, bw=bw
 			)
-			.Object@sizes <- length(seed_sample) * (.Object@sizes/sum(.Object@sizes))
-		}
+			.Object@densities <- length(seed_sample) * (.Object@densities/sum(.Object@densities))
+		} else if(!is.null(density) && !is.null(n_bins) && !is.null(bw) &&
+							!is.null(limits)) {
+			.Object@densities = vector(mode="numeric", length=n_bins)
+			.Object@n_bins		= n_bins
+			.Object@limits		= limits
+			h <- (limits[['max']] - limits[['min']]) / n_bins
+			.Object@midpoints = limits[['min']] + ((1:n_bins)-0.5) * h
+			.Object@densities = sapply(
+				X		=.Object@midpoints,
+				FUN = density
+			)
+
+		} else { stop("Nonsensical parameters.") }
   	return(.Object)
 	}
 )
@@ -77,10 +90,10 @@ setMethod(
 	signature = signature("size_distribution"),
 	definition = function(...) {
 		dots = list(...)
-		szs = sapply(X=dots, FUN=function(x) x@sizes)
+		szs = sapply(X=dots, FUN=function(x) x@densities)
 		szs <- apply(szs, 1, sum)
 		o <- dots[[1]]
-		o@sizes <- szs
+		o@densities <- szs
 		return(o)
 	}
 )
@@ -138,7 +151,8 @@ staged_size_distribution <- function(
 					max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
 				),
 				bw=as.integer(length(seed_sample)/15)+1,
-				traits=list()
+				traits=list(),
+				density=NULL
 		) {
 			.Object <- callNextMethod(
 				.Object = .Object,
@@ -146,7 +160,8 @@ staged_size_distribution <- function(
 				seed_sample = seed_sample,
 				n_bins = n_bins,
 				limits = limits,
-				bw = bw
+				bw = bw,
+				density = density
 			)
 			.Object@traits = traits
 	  	return(.Object)
@@ -202,7 +217,7 @@ staged_growth_factory <- function(
 				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 	
 			## Transform:
-			.Object@sizes <- as.vector(S %*% .Object@sizes)
+			.Object@densities <- as.vector(S %*% .Object@densities)
 			return(.Object)
 	
 	}
@@ -249,10 +264,10 @@ staged_transition_factory <- function(
 			eye <- diag(rep(1,nrow(S)))
 
 			## Calculate density/count of remaining:
-			.ObjectA@sizes <- as.vector((eye-S) %*% .Object@sizes)
+			.ObjectA@densities <- as.vector((eye-S) %*% .Object@densities)
 
 			## Calculate density/count of transitioning:
-			.ObjectB@sizes <- as.vector((  S) %*% .Object@sizes)
+			.ObjectB@densities <- as.vector((  S) %*% .Object@densities)
 
 			
 			return(list(.ObjectA,.ObjectB))
@@ -303,14 +318,14 @@ staged_reproduction_factory <- function(
 			### contribute through reproduction (zero inflation of fecundity).
 			R <- diag(.Object@n_bins)
 			diag(R) <- reproduction_model$predict(newdata = newdata)
-			.ObjectN@sizes <- as.vector(  R %*% .ObjectN@sizes)
+			.ObjectN@densities <- as.vector(  R %*% .ObjectN@densities)
 
 			
 			## STEP 4: Calculate how offspring from each size class will be
 			## represented in the final offspring population (fecundity).
 			F <- diag(.Object@n_bins)
 			diag(F) <- fecundity_model$predict(newdata = newdata)
-			.ObjectN@sizes <- as.vector(  F %*% .ObjectN@sizes)
+			.ObjectN@densities <- as.vector(  F %*% .ObjectN@densities)
 
 			## STEP 5: Calculate the final size distribution of offspring
 			## based on the parental size distribution (size model).
@@ -336,7 +351,7 @@ staged_reproduction_factory <- function(
 				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 	
 			## Transform:
-			.ObjectN@sizes <- as.vector(S %*% .ObjectN@sizes)
+			.ObjectN@densities <- as.vector(S %*% .ObjectN@densities)
 
 
 			return(list(.Object,.ObjectN))

@@ -26,7 +26,7 @@ setMethod(
 				newdata = newdata,
 				type = 'response'
 			)
-		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		.Object@densities <- as.vector(S %*% .Object@densities)
 		return(.Object)
 	}
 )
@@ -49,7 +49,7 @@ setMethod(
 			newdata[[nom]] <- covariates[[nom]]
 		}
 		diag(S) <- model$predict(newdata = newdata)
-		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		.Object@densities <- as.vector(S %*% .Object@densities)
 		return(.Object)
 	}
 )
@@ -99,7 +99,7 @@ setMethod(
 				rnorm(nrow(mf),0,sigma)
 		)
 
-		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		.Object@densities <- as.vector(S %*% .Object@densities)
 		return(.Object)
 	}
 )
@@ -149,7 +149,7 @@ setMethod(
 			FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 
 		## Transform:
-		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		.Object@densities <- as.vector(S %*% .Object@densities)
 		return(.Object)
 	}
 )
@@ -198,7 +198,7 @@ setMethod(
 			FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 
 		## Transform:
-		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		.Object@densities <- as.vector(S %*% .Object@densities)
 		return(.Object)
 	}
 )
@@ -263,7 +263,7 @@ setMethod(
 			FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 
 		## Transform:
-		.Object@sizes <- as.vector(S %*% .Object@sizes)
+		.Object@densities <- as.vector(S %*% .Object@densities)
 		return(.Object)
 	}
 )

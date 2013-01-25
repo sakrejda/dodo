@@ -4,7 +4,7 @@ setMethod(
 		x = "size_distribution"
 	),
 	definition = function(x, ...) {
-		plot(x@midpoints, x@sizes, ...)
+		plot(x@midpoints, x@densities, ...)
 	}
 )
 
@@ -15,7 +15,7 @@ setMethod(
 #	),
 #	definition = function(x, ...) {
 #		### ONCE PER STAGE:::
-#		plot(x@midpoints, x@sizes, ...)
+#		plot(x@midpoints, x@densities, ...)
 #	}
 #)
 
