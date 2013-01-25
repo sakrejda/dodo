@@ -350,7 +350,7 @@ pop$add_model(
 
 
 pop$add(
-	Class="stock_size_distribution", 
+	stage="stock", 
 	args=list(
 		n_bins=250, 
 		limits=c(min=0, max=250), 
