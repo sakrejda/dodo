@@ -289,7 +289,7 @@ pop$add_model(
 pop$add_model(
 	stage						=	'one_winter_parr',
 	transformation	=	'age',
-	model						= staged_transition_factory('one_winter_parr', 'one_spring_parr', pa))
+	model						= staged_transition_factory('one_winter_parr', 'two_spring_parr', pa))
 
 ## Two plus:
 pop$add_model(
@@ -495,22 +495,22 @@ envir <- cbind(read.csv('~/downloads/seasonal_streamflow.csv'),
 envir$season <- as.factor(envir$season)
 
 
-for ( i in 1:5 ) { 
-	pop$run(n=1, e=envir[i,], o='/tmp') # Run one step of the model
-	for ( j in 1:length(pop$sub_pops) ) { 
-		plot(pop$sub_pops[[j]]);
-		print(pop$sub_pops[[j]]@stage_name); 
-		readline(); dev.off() 
-	}
-}
-
+#for ( i in 1:5 ) { 
+#	pop$run(n=1, e=envir[i,], o='/tmp') # Run one step of the model
+#	for ( j in 1:length(pop$sub_pops) ) { 
+#		plot(pop$sub_pops[[j]]);
+#		print(pop$sub_pops[[j]]@stage_name); 
+#		readline(); dev.off() 
+#	}
+#}
+#
 
 pop$clear()
 pop$add(
   stage="stock",
   args=list(
-    n_bins=250,
-    limits=c(min=0, max=250),
+    n_bins=350,
+    limits=c(min=0, max=350),
     density=function(y) dnorm(x=y, mean=15, sd=1)
   )
 )
