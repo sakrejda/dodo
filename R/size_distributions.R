@@ -112,6 +112,7 @@ staged_size_distribution <- function(
 	### This factory sets the derived class, sets its init method, then
 	### defines the reference class with its initialize method (which
 	### just passes on the call.
+	stage_name; stage; traits
 
 	staged_size_distribution <- setClass(
 		Class = paste(stage_name, "size_distribution", sep='_'),
@@ -151,7 +152,7 @@ staged_size_distribution <- function(
 					max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
 				),
 				bw=as.integer(length(seed_sample)/15)+1,
-				traits=list(),
+				traits_=traits,
 				density=NULL
 		) {
 			.Object <- callNextMethod(
@@ -163,7 +164,7 @@ staged_size_distribution <- function(
 				bw = bw,
 				density = density
 			)
-			.Object@traits = traits
+			.Object@traits = traits_
 	  	return(.Object)
 		},
 		where = where

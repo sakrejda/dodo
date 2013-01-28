@@ -1,30 +1,3 @@
-path_helper <- function(path, timestamp) {
-		ts <- paste(strsplit(x=date(), split=' ')[[1]], sep='_', collapse='_')
-		if (is.null(path)) stop("Target file or directory must be supplied.")
-		if (file.exists(path)) {
-			fi <- file.info(path)
-			if (fi$isdir) {
-				pattern <- 'pops-'
-				if (timestamp) {
-					pattern <- paste(pattern, ts, sep='')
-				}
-				target <- tempfile(pattern=paste(pattern,'-',sep=''), tmpdir=path, fileext='.rds')
-			} else {
-				stop("Target file already exists.")		
-			}
-		} else {
-			target <- path
-			if (timestamp) {
-				target <- strsplit(x=target, split='.', fixed=TRUE)[[1]]
-				if (length(target) > 1) {
-					target <- paste(target[1],ts,paste(target[2:length(target)], collapse='-'),sep='-') 
-				} else {
-					target <- paste(target,ts,sep='-')
-				}
-			}
-		}
-		return(target)
-}
 
 population <- setRefClass(
 	Class = "population",
@@ -81,6 +54,7 @@ population <- setRefClass(
 			all_args <- c(list(Class=paste(stage,'_size_distribution',sep='')), args)
 			new_pop <- do.call(what=new, args = all_args, envir=.self$life_cycle@stages)
 			sub_pops <<- c(.self$sub_pops, list(new_pop))
+			return(new_pop)
 		},
 		add_model = function(stage, transformation, model) {
 			life_cycle <<- add_lc_node_model(life_cycle, stage, transformation, model)
@@ -100,7 +74,7 @@ population <- setRefClass(
 			## sort of overhead this introduces, only relevant if the
 			## "env" list gets BIG:
 			if (is.function(f)) {
-				return(f(sub_pop, env[[node]]))
+				return(f(sub_pop, as.list(env[[node]])))
 			} else return(sub_pop)
 		},
 		step = function(synchronize=TRUE) {								
@@ -172,7 +146,7 @@ population <- setRefClass(
 			} else if (is.list(e)) {
 				## Single element list:
 				if (!any(sapply(e,is.list))) {
-					o <- replicate(n=length(env), expr=as.environment(e))
+					o <- replicate(n=length(env), expr=list.2.environment(e))
 					names(o) <- names(env)
 					env <<- o
 					return(env)
@@ -182,7 +156,7 @@ population <- setRefClass(
 					stop("Some elements of 'env' not defined in argument 'e'.")
 				}
 				all_environments <- all(sapply(e,is.environment))
-				all_lists <- all(sapply(e,is.list()))
+				all_lists <- all(sapply(e,is.list))
 				if (!all_environments && !all_lists) {
 					stop("Not all elements of argument 'e' are environments.")
 				}
@@ -193,13 +167,15 @@ population <- setRefClass(
 				}
 				## List of lists:
 				if (all_lists) {
-					e <- lapply(e,as.environment())
+					e <- lapply(e,list.2.environment)
 					env <<- e
 					return(env)
 				}
 			}
 		},
 		run = function(e = new.env(), n = 1, o = NULL) {
+			if (is.data.frame(e)) 
+				e <- lapply(1:nrow(e),function(i) as.list(e[i,]))
 			## What to do with output:
 			if (!is.null(o)) o_type <- file.info(o)
 
@@ -207,8 +183,8 @@ population <- setRefClass(
 			is_env <- is.environment(e)
 			is_list <- is.list(e) && !is.list(e[[1]])
 			if (!is_env && !is_list) {
-				env_list <- all(sapply(e),is.environment)
-				list_list <- all(sapply(e),is.list)
+				env_list <- all(sapply(e,is.environment))
+				list_list <- all(sapply(e,is.list))
 			} else { env_list <- FALSE; list_list <- FALSE }
 
 			if (is_env || is_list) {

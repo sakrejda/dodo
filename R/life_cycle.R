@@ -60,7 +60,7 @@ setMethod(
 			FUN = staged_size_distribution,
 				stage_name = stages[['stage_name']],
 				stage = 1:nrow(stages),
-				traits = apply(X=stages, MARGIN=1, FUN=as.list),
+				traits = data.frame.2.lists(stages),
 			MoreArgs = list(where = .Object@stages)
 		)
 		return(.Object)
