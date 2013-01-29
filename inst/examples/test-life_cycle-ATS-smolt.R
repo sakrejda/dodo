@@ -31,18 +31,23 @@ sp <- new('pGLM',
 	formula = ~ 1 + season,
 	family = binomial(link=rlogit),
 	coefficients = list(
-		"(Intercept)" = 1.3, 
+		"(Intercept)" = -100, 
 		season2 = -100,
 		season3 = -100,
-		season4 = -100
+		season4 = 100+1.3
 	),
 	epsilon = function(n=1) { rnorm(n=n, mean=0, sd=0.1) },
 	samp = FALSE
 )
 sf <- new('pGLM',
-	formula = ~ 1,
+	formula = ~ 1 + season, 
 	family = poisson(link=log),
-	coefficients = list("(Intercept)"=2),
+	coefficients = list(
+		"(Intercept)"=-100,
+		season2 = -100,
+		season3 = -100,
+		season4 = 100+2
+	),
 	epsilon = function(n=1) { rnorm(n=n, mean=0, sd=0.01) },
 	samp = FALSE
 )
@@ -468,27 +473,6 @@ pop$add_model(
 ################################################################################
 ################################################################################
 
-
-
-pop$add(
-	stage="stock", 
-	args=list(
-		n_bins=250, 
-		limits=c(min=0, max=250), 
-		density=function(y) dnorm(x=y, mean=15, sd=1)
-	)
-)
-
-#### SO: after two (?) steps, there are two sizes of fry because one set
-##       got to grow and the other didn't.  Add seasonality! (through
-##       env) ... also, "survive" transformation should be "mortality"
-##			 transformation and there should be a separate "age"
-##			 transformation... (maybe that can also do stocking since that
-##			 _is_ aging for the stock source...
-
-#### SO: Added seasonality to stocking (spring only...) need to add
-##			 aging models.
-
 envir <- cbind(read.csv('~/downloads/seasonal_streamflow.csv'),
 							 read.csv('~/downloads/seasonal_streamtemp.csv')
 					)
@@ -514,7 +498,7 @@ pop$add(
     density=function(y) dnorm(x=y, mean=15, sd=1)
   )
 )
-pop$run(n=nrow(envir), e=envir, o='/tmp')
+pop$run(n=40, e=envir, o='/tmp')
 
 # Alternatively, if you want to see what it looks like before sync:
 #pop$step(synchronize=FALSE)

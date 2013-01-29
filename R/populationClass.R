@@ -200,7 +200,9 @@ population <- setRefClass(
 				for ( i in 1:n ) {
 					set_env(e[[i]])
 					step()
+					if (!is.null(o) && o_type$isdir) save_populations(path=o)
 				}
+				if (!is.null(o)) save(path=o)
 			}
 		}
 	)
