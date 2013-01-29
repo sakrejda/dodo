@@ -39,4 +39,12 @@ data.frame.2.lists <- function(x) {
 }
 
 
+rlogit <- list(
+  linkfun   = function(mu) {qlogis(1-mu)},
+  linkinv   = function(eta) {plogis(-1*eta)},
+  mu.eta    = function(eta) {},
+  valideta  = function(eta) TRUE,
+  name      = "rlogit"
+)
+class(rlogit) <- "link-glm"
 
