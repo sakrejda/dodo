@@ -9,7 +9,8 @@ pop$add(
     density=function(y) dnorm(x=y, mean=15, sd=1)
   )
 )
-pop$run(n=40, e=envir, o='/tmp')
+pop$run(n=4, e=envir, o='/tmp')
+pop$clear()
 
 # Alternatively, if you want to see what it looks like before sync:
 #pop$step(synchronize=FALSE)

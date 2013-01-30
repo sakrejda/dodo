@@ -50,9 +50,9 @@ population <- setRefClass(
 			}
 		},
 		add = function(stage, args) {
-
+			attach(what=life_cycle@stages)
 			all_args <- c(list(Class=paste(stage,'_size_distribution',sep='')), args)
-			new_pop <- do.call(what=new, args = all_args, envir=.self$life_cycle@stages)
+			new_pop <- do.call(what=new, args = all_args, envir=life_cycle@stages)
 			sub_pops <<- c(.self$sub_pops, list(new_pop))
 			return(new_pop)
 		},
