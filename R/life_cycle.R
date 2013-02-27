@@ -45,18 +45,36 @@ setMethod(
 		.Object@graph <- graphNEL(
 			nodes=stages[['stage_name']], 
 			edgemode = "directed")
-#		for ( i in 1:nrow(parents) ) {
-#			.Object@graph <- addEdge(
-#				from = parents[i,'parent_stage'], 
-#				to = parents[i, 'stage_name'], 
-#				graph = .Object@graph)
-#		}
 		.Object@adjMatrix <- Matrix(data=as(.Object@graph,Class='graphAM')@adjMat)
+
+		## Massage stage data for mapply:
+		lengths <- sapply(stages, length)
+		one_lengths <- lengths == 1
+		full_lenghts <- lengths == max(lengths)
+		if (sum(one_lengths | full_lengths) != length(stages)) {
+			stop("All elements of 'stages' argument must either be length 1 or specified per-stage.")
+		}
+		one_lengths_names <- names(stages)[one_lengths]
+		full_lengths_names <- names(stages)[full_lengths]
+		stages <- stages[full_lengths_names]
+		for (nom in one_lengths_names) {
+			if (is.function(stages[[nom]])) {
+				stages[[nom]] <- lapply(1:max(lengths), function(x) return(stages[[nom]]))
+			} else {
+				stages[[nom]] <- as.list(rep(stages[[nom]], max(lengths)))
+			}
+		}
+		traits_ <- list()
+		for ( i in 1:max(lengths) ) {
+			traits_[[i]] <- lapply(stages, `[`, i=i)
+		}
+
+		## Create classes:
 		classes <- mapply(
 			FUN = staged_size_distribution,
 				stage_name = stages[['stage_name']],
 				stage = 1:nrow(stages),
-				traits = data.frame.2.lists(stages),
+				traits = (stages),
 			MoreArgs = list(where = .Object@stages)
 		)
 		return(.Object)
