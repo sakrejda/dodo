@@ -50,7 +50,7 @@ setMethod(
 		## Massage stage data for mapply:
 		lengths <- sapply(stages, length)
 		one_lengths <- lengths == 1
-		full_lenghts <- lengths == max(lengths)
+		full_lengths <- lengths == max(lengths)
 		if (sum(one_lengths | full_lengths) != length(stages)) {
 			stop("All elements of 'stages' argument must either be length 1 or specified per-stage.")
 		}
@@ -73,8 +73,8 @@ setMethod(
 		classes <- mapply(
 			FUN = staged_size_distribution,
 				stage_name = stages[['stage_name']],
-				stage = 1:nrow(stages),
-				traits = (stages),
+				stage = 1:length(traits_),
+				traits = (traits_),
 			MoreArgs = list(where = .Object@stages)
 		)
 		return(.Object)

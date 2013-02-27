@@ -70,17 +70,15 @@ stages <- structure(
 	 12.1,   11.4,      12.9,     12.9,
 	 rep(NA,31))
 	),
+	standardize_size = function(df) {
+		df[['std_sizes']] <- (df[['sizes']] - df[['sizeAtAge']])/df[['sdAtAge']]
+		return(df)
+	},
 
 	.Names = c("stage_name", "age_in_months", "duration", "moy",
-						 "ageInSamples", "sizeAtAge", "sdAtAge"), 
-	row.names = c(
-		"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", 
-		"14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "36", 
-		"49", "110", "24", "31", "41", "51", "61", "71", "81", "91", 
-		"101", "111", "121", "131", "141", "151", "161", "171", "181", 
-		"191", "201", "211", "221", "231", "361", "491", "500", "501", "502"), 
+						 "ageInSamples", "sizeAtAge", "sdAtAge") 
 
-class = "data.frame")
+)
 
 
 transformations <- structure(
@@ -161,7 +159,8 @@ fm <- new('pGLM',
 
 ## Growth of juveniles:
 jg <- new('pGLM',
-	formula = ~ 1 + ageInSamples + ageInSamples:WB + ageInSamples:flow + ageInSamples:sizes + offset(sizes),
+	formula = ~ 1 + ageInSamples + ageInSamples:temperature + ageInSamples:flow + 
+									ageInSamples:std_sizes + offset(sizes),
 	family = gaussian(link="log"),
 	coefficients = list(
 		"(Intercept)"  = s[['gr_beta_0']] +  s[['gr_beta_ais']][ 1],
@@ -180,8 +179,56 @@ jg <- new('pGLM',
 		ageInSamples14 = s[['gr_beta_0']] +  s[['gr_beta_ais']][14],
 		ageInSamples15 = rep(0, length(s[['gr_beta_0']])),
 
+		"ageInSamples1:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][1],
+		"ageInSamples2:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][2],
+		"ageInSamples3:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][3],
+		"ageInSamples4:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][4],
+		"ageInSamples5:temperature" = s[['phi_beta_t']],
+		"ageInSamples6:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][6],
+		"ageInSamples7:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][7],
+		"ageInSamples8:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][8],
+		"ageInSamples9:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][9],
+		"ageInSamples10:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][10],
+		"ageInSamples11:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][11],
+		"ageInSamples12:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][12],
+		"ageInSamples13:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][13],
+		"ageInSamples14:temperature" = s[['phi_beta_t']] + s[['phi_beta_t_ais']][14],
+		"ageInSamples15:temperature" = rep(0, length(s[['gr_beta_0']])),
+
+		"ageInSamples1:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][1],
+		"ageInSamples2:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][2],
+		"ageInSamples3:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][3],
+		"ageInSamples4:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][4],
+		"ageInSamples5:flow" = s[['phi_beta_d']],
+		"ageInSamples6:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][6],
+		"ageInSamples7:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][7],
+		"ageInSamples8:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][8],
+		"ageInSamples9:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][9],
+		"ageInSamples10:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][10],
+		"ageInSamples11:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][11],
+		"ageInSamples12:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][12],
+		"ageInSamples13:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][13],
+		"ageInSamples14:flow" = s[['phi_beta_d']] + s[['phi_beta_d_ais']][14],
+		"ageInSamples15:flow" = rep(0, length(s[['gr_beta_0']])),
+
+		"ageInSamples1:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][1],
+		"ageInSamples2:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][2],
+		"ageInSamples3:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][3],
+		"ageInSamples4:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][4],
+		"ageInSamples5:std_sizes" = s[['phi_beta_size']],
+		"ageInSamples6:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][6],
+		"ageInSamples7:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][7],
+		"ageInSamples8:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][8],
+		"ageInSamples9:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][9],
+		"ageInSamples10:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][10],
+		"ageInSamples11:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][11],
+		"ageInSamples12:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][12],
+		"ageInSamples13:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][13],
+		"ageInSamples14:std_sizes" = s[['phi_beta_size']] + s[['phi_beta_size_ais']][14],
+		"ageInSamples15:std_sizes" = rep(0, length(s[['gr_beta_0']]))
+
 	),
-	epsilon = function(n=1) { rnorm(n=n, mean=0, sd=1) },
+	epsilon = function(n=1) { rnorm(n=n, mean=0, sd=0.7) },
 	samp = FALSE
 )
 
