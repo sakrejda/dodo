@@ -39,7 +39,8 @@ setMethod(
 				max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
 			),
 			bw=as.integer(length(seed_sample)/15)+1,
-			density=NULL
+			density=NULL,
+			N=NULL
 	) {
 		if (is(Object_,"size_distribution")) {
 			.Object@densities 		= Object_@densities
@@ -63,8 +64,7 @@ setMethod(
 				seed=seed_sample, bw=bw
 			)
 			.Object@densities <- length(seed_sample) * (.Object@densities/sum(.Object@densities))
-		} else if(!is.null(density) && !is.null(n_bins) && !is.null(bw) &&
-							!is.null(limits)) {
+		} else if(!is.null(density) && !is.null(n_bins) && !is.null(limits)) {
 			.Object@densities = vector(mode="numeric", length=n_bins)
 			.Object@n_bins		= n_bins
 			.Object@limits		= limits
@@ -76,6 +76,9 @@ setMethod(
 			)
 
 		} else { stop("Nonsensical parameters.") }
+		if (!is.null(N)) {
+			.Object@densities <- .Object@densities * N
+		}
   	return(.Object)
 	}
 )
@@ -153,7 +156,8 @@ staged_size_distribution <- function(
 				),
 				bw=as.integer(length(seed_sample)/15)+1,
 				traits_=traits,
-				density=NULL
+				density=NULL,
+				N=NULL
 		) {
 			.Object <- callNextMethod(
 				.Object = .Object,
@@ -162,7 +166,8 @@ staged_size_distribution <- function(
 				n_bins = n_bins,
 				limits = limits,
 				bw = bw,
-				density = density
+				density = density,
+				N = N
 			)
 			.Object@traits = traits_
 	  	return(.Object)
@@ -185,18 +190,19 @@ staged_growth_factory <- function(
 	model   ## Closure!
 
 	growth_function <- function(.Object, covariates) {
+			## Build environment/trait data frame:
 			newdata <- data.frame(
 				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints
+				sizes = .Object@midpoints,
+				covariates,
+				.Object@traits[!sapply(.Object@traits,is.function)]
 			)
-			for ( nom in names(covariates) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- covariates[[nom]]
+
+			## Apply reaction norms (abuse of term...):
+			for (f in .Object@traits[sapply(.Object@traits,is.function)]) {
+				newdata <- f(newdata)
 			}
-			for ( nom in names(.Object@traits) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- .Object@traits[[nom]]
-			}
+
 			## Calculate means:
 			mu <- model$predict(newdata = newdata)
 	
@@ -247,20 +253,23 @@ staged_transition_factory <- function(
 			)
 			.ObjectA <- .Object
 
-			## Calculate the proportion which transition
+			## Transition matrix:
 			S <- diag(.Object@n_bins)
+
+			## Build environment/trait data frame:
 			newdata <- data.frame(
 				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints
+				sizes = .Object@midpoints,
+				covariates,
+				.Object@traits[!sapply(.Object@traits,is.function)]
 			)
-			for ( nom in names(covariates) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- covariates[[nom]]
+
+			## Apply reaction norms (abuse of term...):
+			for (f in .Object@traits[sapply(.Object@traits,is.function)]) {
+				newdata <- f(newdata)
 			}
-			for ( nom in names(.Object@traits) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- .Object@traits[[nom]]
-			}
+
+			## Predict:
 			diag(S) <- model$predict(newdata = newdata)
 			eye <- diag(rep(1,nrow(S)))
 
@@ -302,17 +311,17 @@ staged_reproduction_factory <- function(
 			)
 
 			## STEP 2: Produce the data frame from which covariates are drawn:
+			## Build environment/trait data frame:
 			newdata <- data.frame(
 				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints
+				sizes = .Object@midpoints,
+				covariates,
+				.Object@traits[!sapply(.Object@traits,is.function)]
 			)
-			for ( nom in names(covariates) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- covariates[[nom]]
-			}
-			for ( nom in names(.Object@traits) ) {
-				### Relies on recycling to get the right number of entries:
-				newdata[[nom]] <- .Object@traits[[nom]]
+
+			## Apply reaction norms (abuse of term...):
+			for (f in .Object@traits[sapply(.Object@traits,is.function)]) {
+				newdata <- f(newdata)
 			}
 
 			### STEP 3: Calculate the proportion at each size class which will

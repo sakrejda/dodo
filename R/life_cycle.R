@@ -4,16 +4,14 @@ life_cycle <- setClass(
 	Class = "life_cycle",
 	representation = representation(
 		graph = "graphNEL",
-		stage_data = "data.frame",
-		parent_data = "data.frame",
+		stage_data = "list",
 		adjMatrix = "Matrix",
 		stages = "environment",
 		transformation_order = "data.frame"
 	),
 	prototype = prototype(
 		graph = graphNEL(),
-		stage_data = data.frame(),
-		parent_data = data.frame(),
+		stage_data = list(),
 		adjMatrix = Matrix(),
 		stages = new.env(),
 		transformation_order = data.frame()
@@ -38,23 +36,21 @@ setMethod(
 	),
 	definition = function(
 		.Object,
-		stages = NULL,
-		parents = NULL
+		stages = NULL
 	) {
 		setPackageName(pkg = "dodo", env = .Object@stages)
 		### short-circuit if stages/parents missing:
-		if (is.null(stages) || is.null(parents)) return(.Object)  
+		if (is.null(stages)) return(.Object)  
 		.Object@stage_data = stages
-		.Object@parent_data = parents
 		.Object@graph <- graphNEL(
 			nodes=stages[['stage_name']], 
 			edgemode = "directed")
-		for ( i in 1:nrow(parents) ) {
-			.Object@graph <- addEdge(
-				from = parents[i,'parent_stage'], 
-				to = parents[i, 'stage_name'], 
-				graph = .Object@graph)
-		}
+#		for ( i in 1:nrow(parents) ) {
+#			.Object@graph <- addEdge(
+#				from = parents[i,'parent_stage'], 
+#				to = parents[i, 'stage_name'], 
+#				graph = .Object@graph)
+#		}
 		.Object@adjMatrix <- Matrix(data=as(.Object@graph,Class='graphAM')@adjMat)
 		classes <- mapply(
 			FUN = staged_size_distribution,

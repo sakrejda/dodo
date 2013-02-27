@@ -8,20 +8,19 @@ population <- setRefClass(
 	),
 	methods = list(
 		initialize = function(											### CONSTRUCTOR
-			stages = NULL, parents = NULL,
+			stages = NULL,
 			transformations = NULL,
 			life_cycle = NULL, sub_pops = NULL, ...
 		) {
-			if (is.null(stages) && is.null(parents) && 
-					is.null(life_cycle) && is.null(sub_pops)) return(.self)
+			if (is.null(stages) && is.null(life_cycle) && is.null(sub_pops)) return(.self)
 
-			if (!is.null(stages) && !is.null(parents) && is.null(life_cycle)) {
-				life_cycle <<- new('life_cycle', stages = stages, parents = parents) 
+			if (!is.null(stages) && is.null(life_cycle)) {
+				life_cycle <<- new('life_cycle', stages = stages) 
 			} else {
-				if (is.null(stages) && is.null(parents) && !is.null(life_cycle)) {
+				if (is.null(stages) && !is.null(life_cycle)) {
 					life_cycle <<- life_cycle
 				} else {
-					msg <- "Life cycle must be specified as parents/stages or object."
+					msg <- "Life cycle must be specified as stage table or object."
 					stop(msg)
 				}
 			}
@@ -56,8 +55,20 @@ population <- setRefClass(
 			sub_pops <<- c(.self$sub_pops, list(new_pop))
 			return(new_pop)
 		},
-		add_model = function(stage, transformation, model) {
+		add_model = function(stage, transformation, model, to = NULL) {
 			life_cycle <<- add_lc_node_model(life_cycle, stage, transformation, model)
+#		for ( i in 1:nrow(parents) ) {
+#			.Object@graph <- addEdge(
+#				from = parents[i,'parent_stage'], 
+#				to = parents[i, 'stage_name'], 
+#				graph = .Object@graph)
+#		} 
+#			if ('stage_name_to' %in% names(formals(model)))
+#				to <- 
+
+			if (!is.null(to)) { 
+				life_cycle@graph <<- addEdge( from = stage, to = to, graph = life_cycle@graph)
+			}
 		},
 		transform = function(node, model, sub_pop, env) {
 			## ONLY using node models, b/c the "model" string
@@ -129,12 +140,15 @@ population <- setRefClass(
 		clear = function() {
 			sub_pops <<- list()
 		},
-		save_populations = function(path = NULL, timestamp=TRUE) {
-			target <- path_helper(path, timestamp)
+		save_populations = function(path = NULL, timestamp=TRUE, iteration=NULL) {
+			target <- path_helper(path, timestamp, iteration)
 			saveRDS(object=sub_pops, file=target)
 		},
-		save = function(path = NULL, timestamp=TRUE) {
-			target <- path_helper(path, timestamp)
+		save = function(path = NULL, timestamp=TRUE, iteration=NULL) {
+			target <- path_helper(path, timestamp, iteration)
+			dn <- dirname(target)
+			bn <- basename(target)
+			target <- file.path(dn, paste('all', bn, sep='-'))
 			saveRDS(object=.self, file=target)
 		},
 		set_env = function(e) {
@@ -190,8 +204,8 @@ population <- setRefClass(
 			if (is_env || is_list) {
 				set_env(e)
 				for ( i in 1:n ) {
+					if (!is.null(o) && o_type$isdir) save_populations(path=o, iteration=i)
 					step()
-					if (!is.null(o) && o_type$isdir) save_populations(path=o)
 				}
 				if (!is.null(o)) save(path=o)
 			}
@@ -199,8 +213,8 @@ population <- setRefClass(
 			if (env_list || list_list) {
 				for ( i in 1:n ) {
 					set_env(e[[i]])
+					if (!is.null(o) && o_type$isdir) save_populations(path=o, iteration=i)
 					step()
-					if (!is.null(o) && o_type$isdir) save_populations(path=o)
 				}
 				if (!is.null(o)) save(path=o)
 			}

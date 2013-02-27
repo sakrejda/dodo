@@ -4,7 +4,7 @@ SEAL = FALSE
 
 ## For life cycles:
 setGeneric(name="make_life_cycle",
-					 def=function(stages, parents, ...)
+					 def=function(stages, ...)
 						 standardGeneric("make_life_cycle"),
 					 	valueClass = "life_cycle")
 setGeneric(name="add_lc_node_model",
