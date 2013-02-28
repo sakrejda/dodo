@@ -56,7 +56,7 @@ setMethod(
 		}
 		one_lengths_names <- names(stages)[one_lengths]
 		full_lengths_names <- names(stages)[full_lengths]
-		stages <- stages[full_lengths_names]
+#		stages <- stages[full_lengths_names]
 		for (nom in one_lengths_names) {
 			if (is.function(stages[[nom]])) {
 				stages[[nom]] <- lapply(1:max(lengths), function(x) return(stages[[nom]]))
@@ -66,7 +66,15 @@ setMethod(
 		}
 		traits_ <- list()
 		for ( i in 1:max(lengths) ) {
-			traits_[[i]] <- lapply(stages, `[`, i=i)
+			traits_[[i]] <- list()
+#			traits_[[i]] <- sapply(stages, `[`, i=i)
+			for ( nom in names(stages) ) {
+				if (!is.list(stages[[nom]][i])) {
+					traits_[[i]][[nom]] <- stages[[nom]][i]
+				} else {
+					traits_[[i]][[nom]] <- stages[[nom]][i][[1]]
+				}
+			}
 		}
 
 		## Create classes:
