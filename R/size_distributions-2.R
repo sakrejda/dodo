@@ -91,17 +91,17 @@ staged_size_distribution <- function(
 }
 
 ################################################################################
-### Staged growth method factory, takes stage_name, pGLM, env
+### Factories of projection functions to wed the function to a
+### particular model or set of models.
 ################################################################################
 
 
 dnorm_projection_factory <- function(
-	stage_name,
 	mean_model,
 	variance_model,
 	where = .GlobalEnv
 ) {
-	mean_model, variance_model   ## Closure!
+	mean_model; variance_model   ## Closure!
 
 	dnorm_projection <- function(.Object, covariates) {
 
@@ -110,7 +110,7 @@ dnorm_projection_factory <- function(
 			mu <- mean_model$predict(newdata = nd)
 			variance <- variance_model$predict(newdata = nd)
 	
-			## Apply error:
+			## Apply:
 			S <- mapply(
 				FUN = function(x,y,sd) {
 					dnorm(x=y, mean=x, sd=sd)
@@ -132,30 +132,66 @@ dnorm_projection_factory <- function(
 	return(dnorm_projection)
 }
 
-################################################################################
-### Staged transition method factory, takes stage_name, pGLM, env
-################################################################################
-
-transition_factory <- function(
-	transition_model,
+dlnorm_projection_factory <- function(
+	mean_model,
+	variance_model,
 	where = .GlobalEnv
 ) {
-	transition_model		## Closure!
+	mean_model; variance_model   ## Closure!
 
-	transition_projection <- function(.Object, covariates) {
+	dlnorm_projection <- function(.Object, covariates) {
 
-			## Transition matrix:
+			## Calculate mean and variance:
+			nd <- .Object$newdata
+			mu <- mean_model$predict(newdata = nd)
+			variance <- variance_model$predict(newdata = nd)
+	
+			## Apply:
+			S <- mapply(
+				FUN = function(mu,to,sd) {
+					if (to <= mu) 
+						return(0) 
+					else 
+						return(dlnorm(x=to, meanlog=mu, sdlog=sd))
+				},
+				mu = mu,
+				sd = sd,
+				MoreArgs = list(to = .Object$midpoints)
+			)
+	
+			## Making sure that the transformation preserves mass:
+			S <- apply(
+				X=S, MARGIN=2, 
+				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
+	
+			return(S)
+	
+	}
+
+	return(dnorm_projection)
+}
+
+
+################################################################################
+### self-projection allows only contributions from a bin to itself, or
+### to the same bin in another stage.
+################################################################################
+
+self_projection_factory <- function(
+	self_model,
+	where = .GlobalEnv
+) {
+	self_model		## Closure!
+
+	self_projection <- function(.Object, covariates) {
 			S <- diag(.Object$n_bins)
-
-			## Build environment/trait data frame:
-			ndata <- .Object$newdata
-
-			## Predict:
-			diag(S) <- model$predict(newdata = newdata)
-			
+			diag(S) <- model$predict(newdata = .Object$newdata)
 			return(S)
 	}
 
-	return(transition_function)
+	return(self_projection)
 }
+
+
+
 
