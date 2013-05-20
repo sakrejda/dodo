@@ -1,5 +1,9 @@
-projection <- setRefClass(
-  Class = "projection",
+###########################################################################
+## Blocked Projection matrices:
+###########################################################################
+
+block_projection <- setRefClass(
+  Class = "block_projection",
   fields = list(
     A = "Matrix",
     stage_names = "character",
@@ -58,7 +62,7 @@ projection <- setRefClass(
 
 setMethod(  
   f="[", 
-  signature = signature(x='projection', i='character',j='character'), 
+  signature = signature(x='block_projection', i='character',j='character'), 
   definition = function(x, i, j) {
     return(x$read(from=i, to=j))
   }
@@ -66,7 +70,7 @@ setMethod(
 
 setMethod(  
   f="[<-",
-  signature = signature(x='projection', i='character',j='character'), 
+  signature = signature(x='block_projection', i='character',j='character'), 
   definition = function(x, i, j, value) {
     x$write(x=value, from=i, to=j)
     return(x)

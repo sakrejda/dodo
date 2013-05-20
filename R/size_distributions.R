@@ -2,106 +2,40 @@
 ## Base class.
 ###########################################################################
 
-size_distribution <- setClass(
+size_distribution <- setRefClass(
 	Class = "size_distribution",
-	representation = representation(
+	fields = list(
 		densities = "numeric",
 		n_bins = "numeric",
 		limits = "numeric",
 		midpoints = "numeric"
 	),
-	prototype = prototype(
-		densities = vector(mode="numeric", length=0),
-		n_bins = 0,
-		limits = vector(mode="numeric", length=2),
-		midpoints = vector(mode="numeric", length=0)
+	methods = list(
+		initialize = function(n_bins, limits, FUN=NULL, ...) {
+			densities <<- vector(mode="numeric", length=n_bins)
+			n_bins <<- n_bins
+			limits <<- limits
+			h <- (limits[['max']] - limits[['min']]) / n_bins
+			midpoints <<- limits[['min']] + ((1:n_bins)-0.5) * h
+			if (!is.null(FUN)) {
+				d <- sapply(X=midpoints, FUN=FUN, ...)
+				if (is.numeric(d) && is.vector(d)) densities <<- d
+			}
+			return(.self)
+		},
+		seed = function(sample, bw=NULL) {
+			if (is.null(bw)) as.integer(length(sample)/15)+1
+			estimator <- function(x, seed, bw) {
+				1/(length(seed)*bw) * sum(dnorm(x=x, mean=seed, sd=1))
+			}
+			densities <<- sapply( X=midpoints, FUN=estimator, seed=sample, bw=bw)
+			densities <<- length(sample) * (densities/sum(densities))
+		}
 	),
-	validity = function(object) {
-		# Write fail conditions which return(FALSE)
-		return(TRUE)
-	},
 	sealed = SEAL
 )
 
 
-setMethod(
-	f = "initialize",
-	signature = signature(
-		.Object = "size_distribution"
-	),
-	definition = function(
-			.Object, 
-			Object_ = FALSE,
-			seed_sample = rnorm(100), 
-			n_bins = length(seed_sample)/10, 
-			limits = c(
-				min = min(seed_sample) - .1*(max(seed_sample)-min(seed_sample)),
-				max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
-			),
-			bw=as.integer(length(seed_sample)/15)+1,
-			density=NULL,
-			N=NULL
-	) {
-		if (is(Object_,"size_distribution")) {
-			.Object@densities 		= Object_@densities
-			.Object@n_bins 		= Object_@n_bins
-			.Object@limits 		= Object_@limits
-			.Object@midpoints = Object_@midpoints
-
-		} else if (is.null(density)) {
-
-			.Object@densities = vector(mode="numeric", length=n_bins)
-			.Object@n_bins = n_bins
-			.Object@limits = limits
-			h <- (limits[['max']] - limits[['min']]) / n_bins
-			.Object@midpoints = limits[['min']] + ((1:n_bins)-0.5) * h
-			estimator <- function(x, seed, bw) {
-				1/(length(seed)*bw) * sum(dnorm(x=x, mean=seed, sd=1))
-			}
-			.Object@densities = sapply(
-				X=.Object@midpoints, 
-				FUN=estimator,
-				seed=seed_sample, bw=bw
-			)
-			.Object@densities <- length(seed_sample) * (.Object@densities/sum(.Object@densities))
-		} else if(!is.null(density) && !is.null(n_bins) && !is.null(limits)) {
-			.Object@densities = vector(mode="numeric", length=n_bins)
-			.Object@n_bins		= n_bins
-			.Object@limits		= limits
-			h <- (limits[['max']] - limits[['min']]) / n_bins
-			.Object@midpoints = limits[['min']] + ((1:n_bins)-0.5) * h
-			.Object@densities = sapply(
-				X		=.Object@midpoints,
-				FUN = density
-			)
-
-		} else { stop("Nonsensical parameters.") }
-		if (!is.null(N)) {
-			.Object@densities <- .Object@densities * N
-		}
-  	return(.Object)
-	}
-)
-
-################################################################################
-### Pooling densities / numbers:
-################################################################################
-
-
-setMethod(
-	f = "pool",
-	signature = signature("size_distribution"),
-	definition = function(...) {
-		dots = list(...)
-		szs = sapply(X=dots, FUN=function(x) x@densities)
-		szs <- apply(szs, 1, sum)
-		o <- dots[[1]]
-		o@densities <- szs
-		return(o)
-	}
-)
-
-	
 ###########################################################################
 ## Class FACTORY function
 ###########################################################################
@@ -110,263 +44,49 @@ staged_size_distribution <- function(
 	stage_name,
 	stage, 
 	traits,
+	covariates,
 	where = .GlobalEnv
 ) { 
 	### This factory sets the derived class, sets its init method, then
 	### defines the reference class with its initialize method (which
 	### just passes on the call.
-	stage_name; stage; traits
+	stage_name; stage; traits; covariates
 
-	staged_size_distribution <- setClass(
+	staged_size_distribution <- setRefClass(
 		Class = paste(stage_name, "size_distribution", sep='_'),
 		contains = "size_distribution",
-		representation = representation(
+		fields = list(
 			id = "character",
 			stage = "numeric",
 			stage_name = "character",
-			traits = "list"
+			traits = "list",
+			covariates = "list",
+			newdata = function(x=NULL) {
+				if (!is.null(x)) stop("Data is a calculated field.")
+				newdata <- data.frame(
+					row = 1:(n_bins),
+					sizes = midpoints,
+					covariates,
+					traits[!sapply(traits,is.function)]   ### FIXED traits.
+				)
+	
+				for (f in traits[sapply(traits,is.function)]) {
+					newdata <- f(newdata)
+				}   ### FUNCTION value traits
+				return(newdata)
+			}
 		),
-		prototype = prototype(
-			id = "",
-			stage = stage,
-			stage_name = stage_name,
-		  traits = traits
+		methods = list(
+			initialize = function(traits, covariates=list(), ...) {
+				traits <<- traits
+				covariates <<- covariates
+				callSuper(...)
+				return(.self)
+			}
 		),
-		validity = function(object) {
-			# Write fails conditions which return(FALSE)
-			return(TRUE)
-		},
 		where = where,
 		sealed = SEAL
 	)
-
-	init_method <- setMethod(
-		f = "initialize",
-		signature = signature(
-			.Object = paste(stage_name, "size_distribution", sep='_')
-		),
-		definition = function(
-				.Object, 
-				Object_ = FALSE,
-				seed_sample = rnorm(100), 
-				n_bins = length(seed_sample)/10, 
-				limits = c(
-					min = min(seed_sample) - .1*(max(seed_sample)-min(seed_sample)),
-					max = max(seed_sample) + .1*(max(seed_sample)-min(seed_sample))
-				),
-				bw=as.integer(length(seed_sample)/15)+1,
-				traits_=traits,
-				density=NULL,
-				N=NULL
-		) {
-			.Object <- callNextMethod(
-				.Object = .Object,
-				Object_ = Object_,
-				seed_sample = seed_sample,
-				n_bins = n_bins,
-				limits = limits,
-				bw = bw,
-				density = density,
-				N = N
-			)
-			.Object@traits = traits_
-	  	return(.Object)
-		},
-		where = where
-	)
-	return(staged_size_distribution)	
+	return(staged_size_distribution)
 }
 
-
-################################################################################
-### Staged growth method factory, takes stage_name, pGLM, env
-################################################################################
-
-staged_growth_factory <- function(
-	stage_name,
-	model,
-	where = .GlobalEnv
-) {
-	model   ## Closure!
-
-	growth_function <- function(.Object, covariates) {
-			## Build environment/trait data frame:
-			newdata <- data.frame(
-				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints,
-				covariates,
-				.Object@traits[!sapply(.Object@traits,is.function)]
-			)
-
-			## Apply reaction norms (abuse of term...):
-			for (f in .Object@traits[sapply(.Object@traits,is.function)]) {
-				newdata <- f(newdata)
-			}
-
-			## Calculate means:
-			mu <- model$predict(newdata = newdata)
-	
-			## Apply error:
-			S <- mapply(
-				FUN = function(x,y, mod_sd) {
-					dnorm(x=y, mean=x, sd=mod_sd)
-				},
-				x = mu,
-				MoreArgs = list(
-					y = .Object@midpoints, 
-					mod_sd = sd(model$errors(1000))
-				)
-			)
-	
-			## Making sure that the transformation preserves mass:
-			S <- apply(
-				X=S, MARGIN=2, 
-				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
-	
-			## Transform:
-			.Object@densities <- as.vector(S %*% .Object@densities)
-			return(.Object)
-	
-	}
-
-	return(growth_function)
-}
-
-################################################################################
-### Staged transition method factory, takes stage_name, pGLM, env
-################################################################################
-
-staged_transition_factory <- function(
-	stage_name_from,
-	stage_name_to,
-	model,
-	where = .GlobalEnv
-) {
-	model		## Closure!
-
-	transition_function <- function(.Object, covariates) {
-			## First keep copy, transition will be from .ObjectA to .ObjectB,
-		  ## leftovers in .ObjectA:
-			.ObjectB <- new(
-				paste(stage_name_to,'size_distribution',sep='_'),
-				.Object
-			)
-			.ObjectA <- .Object
-
-			## Transition matrix:
-			S <- diag(.Object@n_bins)
-
-			## Build environment/trait data frame:
-			newdata <- data.frame(
-				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints,
-				covariates,
-				.Object@traits[!sapply(.Object@traits,is.function)]
-			)
-
-			## Apply reaction norms (abuse of term...):
-			for (f in .Object@traits[sapply(.Object@traits,is.function)]) {
-				newdata <- f(newdata)
-			}
-
-			## Predict:
-			diag(S) <- model$predict(newdata = newdata)
-			eye <- diag(rep(1,nrow(S)))
-
-			## Calculate density/count of remaining:
-			.ObjectA@densities <- as.vector((eye-S) %*% .Object@densities)
-
-			## Calculate density/count of transitioning:
-			.ObjectB@densities <- as.vector((  S) %*% .Object@densities)
-
-			
-			return(list(.ObjectA,.ObjectB))
-	}
-
-	return(transition_function)
-}
-
-################################################################################
-### Staged growth/"survival" method factory, takes stage_name, pGLM, env
-################################################################################
-
-staged_reproduction_factory <- function(
-	stage_name_from,
-	stage_name_to,
-	reproduction_model,
-	fecundity_model,
-	size_model,
-	where = .GlobalEnv
-) {
-
-	reproduction_model; fecundity_model; size_model     ## Closure!
-
-	reproduction_function <- function(.Object, covariates) {
-
-			## STEP 1: copy, .Object keeps its identity throughout and
-		  ## .ObjectN will be the new individuals.  
-			.ObjectN <- new(
-				paste(stage_name_to,'size_distribution',sep='_'),
-				.Object
-			)
-
-			## STEP 2: Produce the data frame from which covariates are drawn:
-			## Build environment/trait data frame:
-			newdata <- data.frame(
-				row = 1:(.Object@n_bins),
-				sizes = .Object@midpoints,
-				covariates,
-				.Object@traits[!sapply(.Object@traits,is.function)]
-			)
-
-			## Apply reaction norms (abuse of term...):
-			for (f in .Object@traits[sapply(.Object@traits,is.function)]) {
-				newdata <- f(newdata)
-			}
-
-			### STEP 3: Calculate the proportion at each size class which will
-			### contribute through reproduction (zero inflation of fecundity).
-			R <- diag(.Object@n_bins)
-			diag(R) <- reproduction_model$predict(newdata = newdata)
-			.ObjectN@densities <- as.vector(  R %*% .ObjectN@densities)
-
-			
-			## STEP 4: Calculate how offspring from each size class will be
-			## represented in the final offspring population (fecundity).
-			F <- diag(.Object@n_bins)
-			diag(F) <- fecundity_model$predict(newdata = newdata)
-			.ObjectN@densities <- as.vector(  F %*% .ObjectN@densities)
-
-			## STEP 5: Calculate the final size distribution of offspring
-			## based on the parental size distribution (size model).
-
-			## Calculate means:
-			mu <- size_model$predict(newdata = newdata)
-	
-			## Apply error:
-			S <- mapply(
-				FUN = function(x,y, mod_sd) {
-					dnorm(x=y, mean=x, sd=mod_sd)
-				},
-				x = mu,
-				MoreArgs = list(
-					y = .ObjectN@midpoints, 
-					mod_sd = sd(size_model$errors(1000))
-				)
-			)
-	
-			## Making sure that the transformation preserves mass:
-			S <- apply(
-				X=S, MARGIN=2, 
-				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
-	
-			## Transform:
-			.ObjectN@densities <- as.vector(S %*% .ObjectN@densities)
-
-
-			return(list(.Object,.ObjectN))
-
-	}
-
-	return(reproduction_function)
-}

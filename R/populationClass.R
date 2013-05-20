@@ -4,152 +4,26 @@ population <- setRefClass(
 	fields = list(
 		life_cycle = "life_cycle",
 		env = "list",
-		sub_pops = "list"
+		projection = "block_projection",
+		distribution = "staged_block_distribution"
 	),
 	methods = list(
 		initialize = function(											### CONSTRUCTOR
 			stages = NULL,
-			transformations = NULL,
-			life_cycle = NULL, sub_pops = NULL, ...
+			bins = NULL,
+			minima = NULL,
+			maxima = NULL,
+			projections = NULL
 		) {
-			if (is.null(stages) && is.null(life_cycle) && is.null(sub_pops)) return(.self)
-
-			if (!is.null(stages) && is.null(life_cycle)) {
-				life_cycle <<- new('life_cycle', stages = stages) 
-			} else {
-				if (is.null(stages) && !is.null(life_cycle)) {
-					life_cycle <<- life_cycle
-				} else {
-					msg <- "Life cycle must be specified as stage table or object."
-					stop(msg)
-				}
-			}
-
-			if (!is.null(transformations)) {
-				life_cycle <<- add_transformations(.self$life_cycle, transformations)
-			}
-
-			if (is.null(sub_pops)) {
-				sub_pops <<- list()
-			} else {
-				sub_pops <<- sub_pops
-			}
 
 			for ( stage in stage_names(.self$life_cycle) ) {
 				env[[stage]] <<- new.env()
 			}
-			callSuper()
 			return(.self)
 		},
-		immigrate = function(population) {						### Have another pop immigrate to this one.
-			if (identical(.self$life_cycle, population$life_cycle)) {
-				sub_pops <<- c(.self$sub_pops,population$sub_pops)
-			} else {
-				stop("Populations are not compatible.")
-			}
+		add_model = function() {
 		},
-		add = function(stage, args) {
-			attach(what=life_cycle@stages)
-			all_args <- c(list(Class=paste(stage,'_size_distribution',sep='')), args)
-			new_pop <- do.call(what=new, args = all_args, envir=life_cycle@stages)
-			sub_pops <<- c(.self$sub_pops, list(new_pop))
-			return(new_pop)
-		},
-		add_model = function(stage, transformation, model, to = NULL) {
-			life_cycle <<- add_lc_node_model(life_cycle, stage, transformation, model)
-#		for ( i in 1:nrow(parents) ) {
-#			.Object@graph <- addEdge(
-#				from = parents[i,'parent_stage'], 
-#				to = parents[i, 'stage_name'], 
-#				graph = .Object@graph)
-#		} 
-#			if ('stage_name_to' %in% names(formals(model)))
-#				to <- 
-
-			if (!is.null(to)) { 
-				life_cycle@graph <<- addEdge( from = stage, to = to, graph = life_cycle@graph)
-			}
-		},
-		transform = function(node, model, sub_pop, env) {
-			## ONLY using node models, b/c the "model" string
-			## is related to whether we get back a single sub_pop,
-			## or a list of them to replace the original.  Then
-			## we have to conditionally unlist to get the flat list
-			## again.  from/to models not needed.
-			f <- get_lc_node_model(.self$life_cycle, node, model)
-			
-			## A little awkward because there might be multiple
-			## instances of a particular stage in the sub_pops list,
-			## but they all use the same environment (if not, they
-			## ought to be a separate stage).  Will find out what
-			## sort of overhead this introduces, only relevant if the
-			## "env" list gets BIG:
-			if (is.function(f)) {
-				return(f(sub_pop, as.list(env[[node]])))
-			} else return(sub_pop)
-		},
-		step = function(synchronize=TRUE) {								
-#     THIS WAS WRONG:
-#			env <<- mcmapply(
-#				FUN = function(x,y) {
-#					y$sizes <- x@sizes   ### Cache sizes for use by transformations
-#					return(y)
-#				},
-#				x = sub_pops,
-#				y = env
-#			)
-#			In an IPM, the densities change, but the transformation is
-#			calculated across all coordinates (midpoints) so that
-#     doesn't matter!
-
-			trans <- get_transformations(.self$life_cycle)
-			for (i in 1:nrow(trans)) {
-##				print(trans[['model']][i])
-				## This next part is inefficient because some sub_pops don't
-				## have a particular transformation (e.g.-juveniles don't
-				## reproduce), so maybe the life_cycle object could be convinced
-				## to efficiently cough up a list of calls if it becomes a
-				## problem...
-				sub_pops <<- mcmapply(
-					FUN = .self$transform,
-					node = sapply(X=sub_pops, FUN=function(x) {x@stage_name}),
-					sub_pop = sub_pops,
-					MoreArgs = list(
-						model = trans[['model']][i],
-						env = env
-					),
-					SIMPLIFY = FALSE
-				)
-				if (any(sapply(sub_pops,is.character)) )
-						stop("Check sub populations, prediction failed.")
-				if (any(lapply(sub_pops,length)>1)) 
-					sub_pops <<- unlist(sub_pops, recursive=FALSE, use.names=FALSE)
-			}
-			if (synchronize) sync()
-		},
-		sync = function() {
-			known_stages <- stage_names(.self$life_cycle)
-			present_stages <- sapply(X=sub_pops, FUN=function(x) {x@stage_name})
-			known_stages <- known_stages[known_stages %in% present_stages]
-			o <- list()
-			for ( stage in known_stages ) {
-				o <- c(o,do.call(what=pool, args=sub_pops[ present_stages %in% stage ]))
-			}
-			sub_pops <<- o
-		},
-		clear = function() {
-			sub_pops <<- list()
-		},
-		save_populations = function(path = NULL, timestamp=TRUE, iteration=NULL) {
-			target <- path_helper(path, timestamp, iteration)
-			saveRDS(object=sub_pops, file=target)
-		},
-		save = function(path = NULL, timestamp=TRUE, iteration=NULL) {
-			target <- path_helper(path, timestamp, iteration)
-			dn <- dirname(target)
-			bn <- basename(target)
-			target <- file.path(dn, paste('all', bn, sep='-'))
-			saveRDS(object=.self, file=target)
+		step = function() {								
 		},
 		set_env = function(e) {
 			if (is.environment(e)) {
