@@ -15,10 +15,17 @@ population <- setRefClass(
 			maxima = NULL,
 			projections = NULL
 		) {
-
+			life_cycle <<- new('life_cycle', 
+												 stages=stages, allowed_projections=projections)
 			for ( stage in stage_names(.self$life_cycle) ) {
 				env[[stage]] <<- new.env()
 			}
+			projection <<- new('block_projection',
+												 stages=stages, bins = bins)
+			distribution <<- new('staged_block_distribution',
+													stages=stages, n_bins=bins, 
+													minima=minima, maxima=maxima,
+													traits=traits)
 			return(.self)
 		},
 		add_model = function() {
