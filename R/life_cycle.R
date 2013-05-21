@@ -13,7 +13,7 @@ life_cycle <- setRefClass(
 		projections_allowed = "character"
 	),
 	methods = list(
-		initialize = function(stages, allowed_projections ) {
+		initialize = function(stages = '', allowed_projections='' ) {
 			stage_names <<- stages
 			j <<- 1:length(stages)
 			projections_allowed <<- allowed_projections
@@ -39,7 +39,7 @@ life_cycle <- setRefClass(
 				)
 				stop(msg)
 			}
-			transitions[[from]][[to]][['projections']] <- projections
+			transitions[[from]][[to]][['projections']] <<- projections
 		},
 		reducer = function(x) {
 		  if (length(x) == 1)
@@ -52,7 +52,7 @@ life_cycle <- setRefClass(
 		  }
 		},
 		get_matrix = function(.Object, from, to, covariates) {
-			transitions[[from]][[to]][['matrices']] <- lapply(
+			transitions[[from]][[to]][['matrices']] <<- lapply(
 				X = transitions[[from]][[to]][['projections']],
 				FUN = function(f, obj, stage, covariates) f(obj, stage, covariates)
 			)

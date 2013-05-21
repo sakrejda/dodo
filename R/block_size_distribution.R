@@ -13,7 +13,13 @@ block_distribution <- setRefClass(
     start_index = "numeric",
     stop_index = "numeric",
 		minima = "numeric",
-		maxima = "numeric"
+		maxima = "numeric",
+		summary = function(x=NULL) {
+			if (is.null(x)) {
+				o <- summary_internal()
+				return(o)
+			}
+		}
   ),
   methods = list(
     initialize = function(
@@ -57,18 +63,18 @@ block_distribution <- setRefClass(
           }
         }
       )
-      stop_index <<- start_index + (n_bins[j] - 1)
+      stop_index <<- start_index + (n_bins - 1)
+			h <- (maxima - minima) / n_bins
 			for ( i in j ) {
-				h <- (maxima[j] - minima[j]) / n_bins[j]
-				midpoints[start_index[j]:stop_index[j],1] <<- 
-					minima[j] + ((1:n_bins[j])-0.5) * h
-				if (!is.null(FUN[[j]])) {
-					d <- sapply(X=midpoints[start_index[j]:stop_index[j],1], FUN=FUN, ...)
+				midpoints[start_index[i]:stop_index[i],1] <<- 
+					minima[i] + ((1:n_bins[i])-0.5) * h[i]
+				if (!is.null(FUN[[i]])) {
+					d <- sapply(X=midpoints[start_index[i]:stop_index[i],1], FUN=FUN, ...)
 					if (is.numeric(d) && is.vector(d)) 
-						densities[start_index[j]:stop_index[j],1] <<- d
+						densities[start_index[i]:stop_index[i],1] <<- d
 				}
 			}
-
+			o <- summary_internal()
       return(.self)
     },
 		write = function(x=NULL, stage=NULL) {
@@ -89,6 +95,35 @@ block_distribution <- setRefClass(
 			if (is.null(stage)) stop("Must specify stage name.")
 			rows <- (start_index[stage_names == stage]):(stop_index[stage_names == stage])
 			return(midpoints[rows,1,drop=FALSE])	
+		},
+		summary_internal = function() {
+			summary_data <- data.frame(
+				index = j,
+				stages = stage_names,
+				bins = n_bins,
+				start = start_index,
+				stop = stop_index,
+				minima = minima, 
+				maxima = maxima
+			)
+			stg <- mapply(
+				FUN = rep,
+				x = stage_names,
+				times = n_bins,
+				USE.NAMES=FALSE
+			)
+
+			density_data <- data.frame(
+				midpoint = midpoints[,1],
+				density = densities[,1],
+				stage = unlist(stg)
+			)
+
+			density_plot <- ggplot(
+				data = density_data,
+				aes(x=midpoint, y=density)
+			) + geom_point() + facet_wrap( ~ stage)
+			return(list(data = summary_data, density=density_plot))
 		}
   )
 )
@@ -124,7 +159,7 @@ staged_block_distribution <- setRefClass(
 		traits = "list"
 	),
 	methods = list(
-		initialize = function(traits, ...) {
+		initialize = function(traits = list(), ...) {
 			traits <<- traits
 			callSuper(...)
 			return(.self)

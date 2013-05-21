@@ -7,7 +7,7 @@ Author: Krzysztof Sakrejda <krzysztof.sakrejda@gmail.com>
 Maintainer: Krzysztof Sakrejda <krzysztof.sakrejda@gmail.com>
 Description: IPM (Ellner XXXX), implemented for Atlantic salmon through to smolting, maybe generalizable.
 License: GPL
-Depends: graph, Rcpp (>= 0.9.10), RBGL, Matrix, parallel
+Depends: graph, Rcpp (>= 0.9.10), RBGL, Matrix, parallel, ggplot2, reshape2, far
 LinkingTo: Rcpp, RcppArmadillo
-Collate: helpers.R allGenerics.R pGLM.R size_distributions.R size_distributionMethods.R life_cycle.R populationClass.R graphicalMethods.R 
+Collate: allGenerics.R block_size_distribution.R graphicalMethods.R helpers.R life_cycle.R pGLM.R projection_factory.R projection_matrix.R size_distributions.R populationClass.R
 Packaged: 2013-01-03 14:46:09 UTC; krzysiek

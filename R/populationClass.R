@@ -13,11 +13,13 @@ population <- setRefClass(
 			bins = NULL,
 			minima = NULL,
 			maxima = NULL,
-			projections = NULL
+			projections = NULL,
+			traits = NULL
 		) {
+			if (is.null(projections)) projections <- ''
 			life_cycle <<- new('life_cycle', 
 												 stages=stages, allowed_projections=projections)
-			for ( stage in stage_names(.self$life_cycle) ) {
+			for ( stage in stages) {
 				env[[stage]] <<- new.env()
 			}
 			projection <<- new('block_projection',

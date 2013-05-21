@@ -125,7 +125,6 @@ self_projection_factory <- function(
 ################################################################################
 
 
-require(far)
 stretch_projection_factory <- function(
 	target_dims = NULL,
 	where = .GlobalEnv
