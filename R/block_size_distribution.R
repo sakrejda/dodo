@@ -159,13 +159,17 @@ staged_block_distribution <- setRefClass(
 		traits = "list"
 	),
 	methods = list(
-		initialize = function(traits = list(), ...) {
-			traits <<- traits
+		initialize = function(traits = NULL, ...) {
+			if (is.null(traits)) {
+				traits <<- sapply(X=list(...)$stages, FUN=function(x) list())
+			} else {
+				traits <<- traits
+			}
 			callSuper(...)
 			return(.self)
 		},
 		newdata = function(stage, covariates=list()) {
-			k <- which(stage == 'stage_names')
+			k <- which(stage == stage_names)
 			nd <- data.frame(
 				row = 1:(n_bins[k]),
 				sizes = midpoints[k],
@@ -180,4 +184,15 @@ staged_block_distribution <- setRefClass(
 		}
 	)
 )
+
+
+#
+#f <- function(...) {
+#	mc <- match.call()
+#	mc2 <- match.call(expand.dots=FALSE)
+#	ma <- match(x='a', table=names(mc))
+#	return(list(mc = mc, mc2 = mc2, ma = ma, a = mc[ma], list(...)))
+#}
+#
+#
 
