@@ -58,7 +58,7 @@ block_projection <- setRefClass(
 			cols <- (start_index[stage_names == from]):(stop_index[stage_names == from])
 			rows <- (start_index[stage_names == to]):(stop_index[stage_names == to])
 			A[rows,cols] <<- x
-			return(A[rows,cols,drop=FALSE])	
+			return(read(from=from, to=to))	
 		},
 		read = function(from=NULL, to=NULL) {
 			if (is.null(from)) stop("Must specify stage name.")
@@ -66,7 +66,10 @@ block_projection <- setRefClass(
 
 			cols <- (start_index[stage_names == from]):(stop_index[stage_names == from])
 			rows <- (start_index[stage_names == to]):(stop_index[stage_names == to])
-			return(A[rows,cols,drop=FALSE])	
+			TMP <- A[rows,cols,drop=FALSE]
+			colnames(TMP) <- cols
+			rownames(TMP) <- rows
+			return(TMP)	
 		},
 		plot_internal = function() {
 			pl <- ggplot(
