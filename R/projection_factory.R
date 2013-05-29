@@ -135,13 +135,16 @@ stretch_projection_factory <- function(
 		stop("Target dimensins must be a vector specifying the number of\n
 				  bins ('n_bins'), as well as the limits ('minumum', 'maximum')")
 	} else {
+		n_bins  <- target_dims['n_bins' ]
+		minimum <- target_dims['minimum']
+		maximum <- target_dims['maximum']
 		h <- (maximum - minimum) / n_bins
 		midpts <- minimum + ((1:n_bins)-0.5) * h
 	}
-	target_dims; midpts
+	target_dims; midpts; n_bins; minimum; maximum
 
 	stretch_projection <- function(.Object, stage, covariates) {
-		j <- .Object$get_midpoints(stage=stage)
+		j <- length(.Object$get_midpoints(stage=stage))
 		k <- length(midpts)
 		S <- interpol.matrix(n=k, m=j)
 		return(S) 
