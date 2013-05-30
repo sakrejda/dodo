@@ -8,49 +8,46 @@ data('estimates-ATS-smolt-M3')
 stages <- structure(
 	list(
 	stage_name = c(
-		"stock", 												"eggs", 												"fry", 
+		"autumn_eggs", 									"winter_eggs", 									"spring_fry", 
+
 		"zero_summer_parr", 						"zero_autumn_parr", 						"zero_winter_parr",
+	
 		"one_spring_parr", 							"one_summer_parr", 							"one_autumn_parr", 
-		"one_winter_parr", 							"two_spring_parr", 							"two_summer_parr", 
-		"two_autumn_parr", 							"two_winter_parr", 							"three_spring_parr", 
-		"three_summer_parr",	 					"three_autumn_parr", 						"three_winter_parr",
+		"one_winter_parr", 							
+		
+		"two_spring_parr", 							"two_summer_parr", 							"two_autumn_parr",
+		"two_winter_parr", 							
+		
+		"three_spring_parr", 						"three_summer_parr",	 					"three_autumn_parr",
+		"three_winter_parr",
+
 		"four_spring_parr", 						"four_summer_parr",	 						"four_autumn_parr", 
-		"four_winter_parr", 						"two_spring_riverine", 					"three_spring_riverine", 
-		"four_spring_riverine", 				"dead_stock", 									"dead_eggs", 
-		"dead_fry", 										"dead_zero_summer_parr", 				"dead_zero_autumn_parr", 
-		"dead_zero_winter_parr",	 			"dead_one_spring_parr", 				"dead_one_summer_parr", 
-		"dead_one_autumn_parr", 				"dead_one_winter_parr", 				"dead_two_spring_parr", 
-		"dead_two_summer_parr", 				"dead_two_autumn_parr", 				"dead_two_winter_parr", 
-		"dead_three_spring_parr",				"dead_three_summer_parr", 			"dead_three_autumn_parr", 
-		"dead_three_winter_parr",				"dead_four_spring_parr", 				"dead_four_summer_parr", 
-		"dead_four_autumn_parr",				"dead_four_winter_parr", 				"dead_two_spring_riverine", 
-		"dead_three_spring_riverine", 	"dead_four_spring_riverine",		"two_spring_riverine_total",
-		"three_spring_riverine_total",	"four_spring_riverine_total"),
+		"four_winter_parr", 						
+		
+		"one_summer_sea2", 							"one_summer_sea3", 						"one_summer_sea4",
+		"one_autumn_sea2",							"one_autumn_sea3", 						"one_autumn_sea4",
+		"one_winter_sea2",							"one_winter_sea3", 						"one_winter_sea4",
 
-	age_in_months = c(
-		-1L, 0L, 7L, 9L, 12L, 15L, 18L, 21L, 24L, 27L, 30L, 33L, 36L, 39L, 
-		42L, 45L, 48L, 51L, 54L, 57L, 60L, 63L, 31L, 43L, 55L, -1L, 0L, 
-		 7L, 9L, 12L, 15L, 18L, 21L, 24L, 27L, 30L, 33L, 36L, 39L, 42L, 
-	 45L, 48L, 51L, 54L, 57L, 60L, 63L, 31L, 43L, 55L, 31L, 43L, 55L), 
-			 
-	duration = c(
-		0L, 7L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 
-	 	3L, 3L, 3L, 3L, 3L, 1L, 1L, 1L, 0L, 7L, 2L, 3L, 3L, 3L, 3L, 3L, 
-	 	3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 1L, 1L, 1L,
-		0L, 0L, 0L), 
+		"two_spring_sea2", 							"two_spring_sea3", 						"two_spring_sea4",
+		"two_summer_sea2", 							"two_summer_sea3", 						"two_summer_sea4",
+		"two_autumn_sea2",							"two_autumn_sea3", 						"two_autumn_sea4",
+		"two_winter_sea2",							"two_winter_sea3", 						"two_winter_sea4",
 
-	moy = c(
-		9L, 9L, 4L, 6L, 9L, 12L, 3L, 6L, 9L, 12L, 3L, 6L, 9L, 12L, 3L, 6L, 9L, 
-		12L, 3L, 6L, 9L, 12L, 4L, 4L, 4L, 9L, 9L, 4L, 6L, 9L, 12L, 3L, 6L, 9L, 
-		12L, 3L, 6L, 9L, 12L, 3L, 6L, 9L, 12L, 3L, 6L, 9L, 12L, 4L, 4L, 4L,
-		4L, 4L, 4L),
+		"three_spring_sea2", 							"three_spring_sea3", 						"three_spring_sea4",
+		"three_summer_sea2", 							"three_summer_sea3", 						"three_summer_sea4",
+		"three_autumn_sea2",							"three_autumn_sea3", 						"three_autumn_sea4",
+		"three_winter_sea2",							"three_winter_sea3", 						"three_winter_sea4"
+	),
 
 	ageInSamples = structure(c(
-		NA, NA, NA, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 
-		14L, 11L, 12L, 13L, 14L, 15L, NA, NA, NA, NA, NA, NA, 1L, 2L, 3L, 
-		4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 11L, 12L, 13L, 14L, 
-		15L, NA, NA, NA, NA, NA, NA), .Label = c("1", "2", "3", "4", "5", "6", "7", "8", 
-		"9", "10", "11", "12", "13", "14", "15"), class = "factor"),
+		NA, NA, NA, 1L, 2L, 3L, 4L, 
+		5L, 6L, 7L, 8L, 9L, 10L, 11L, 
+		12L, 13L, 14L, 11L, 12L, 13L, 
+		14L, 15L, 
+		rep(NA,33)), 
+		.Label = c("1", "2", "3", "4", "5", "6", "7", "8", 
+		"9", "10", "11", "12", "13", "14", "15"), class = "factor"
+	),
 
 	sizeAtAge = c(
 		NA, 			NA, 		NA, 
@@ -59,7 +56,7 @@ stages <- structure(
 	 121.4,	 141.7,  144.8,  149.3,
 	 150.6,  163.1,  162.9,  167.9,
 	 168.9,  181.9,	 182.9,	 183.0,
-	 rep(NA,31)
+	 rep(NA,33)
 	), 
 	sdAtAge = c(
 		 NA,		 NA,				NA,
@@ -68,7 +65,7 @@ stages <- structure(
 	 14.5,	 10.8,		  11.8,     11.9,
 	 12.1,	 11.4,			12.9,     11.9,
 	 12.1,   11.4,      12.9,     12.9,
-	 rep(NA,31)),
+	 rep(NA,33)),
 
 	standardize_size = function(df) {
 		df[['std_sizes']] <- (df[['sizes']] - df[['sizeAtAge']])/df[['sdAtAge']]
@@ -90,8 +87,7 @@ stages <- structure(
 	}
 
 	),
-	.Names = c("stage_name", "age_in_months", "duration", "moy",
-						 "ageInSamples", "sizeAtAge", "sdAtAge", "standardize_size",
+	.Names = c("stage_name", "ageInSamples", "sizeAtAge", "sdAtAge", "standardize_size",
 						 "flow_conversion", "temp_conversion") 
 
 )
