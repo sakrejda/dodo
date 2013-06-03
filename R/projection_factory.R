@@ -21,6 +21,9 @@ dnorm_projection_factory <- function(
 					maximum = .Object@maxima[.Object@stage_names == stage])
 					midpts = .Object$get_midpoints(stage=stage)
 			} else {
+				n_bins <- target_dims['n_bins']
+				minimum <- target_dims['minimum']
+				maximum <- target_dims['maximum']
 				h <- (maximum - minimum) / n_bins
 				midpts <- minimum + ((1:n_bins)-0.5) * h
 			}
@@ -40,7 +43,7 @@ dnorm_projection_factory <- function(
 					dnorm(x=y, mean=x, sd=sd)
 				},
 				x = mu,
-				sd = sd,
+				sd = sqrt(variance),
 				MoreArgs = list(y = midpts)
 			)
 	
@@ -59,11 +62,30 @@ dnorm_projection_factory <- function(
 dlnorm_projection_factory <- function(
 	mean_model,
 	variance_model,
+	target_dims = NULL,
 	where = .GlobalEnv
 ) {
-	mean_model; variance_model   ## Closure!
+	mean_model; variance_model; target_dims   ## Closure!
 
 	dlnorm_projection <- function(.Object, stage, covariates) {
+			if (is.null(target_dims)) { 
+				target_dims <- c(
+					n_bins = .Object@n_bins[.Object@stage_names == stage],
+					minimum = .Object@minima[.Object@stage_names == stage],
+					maximum = .Object@maxima[.Object@stage_names == stage])
+					midpts = .Object$get_midpoints(stage=stage)
+			} else {
+				n_bins <- target_dims['n_bins']
+				minimum <- target_dims['minimum']
+				maximum <- target_dims['maximum']
+				h <- (maximum - minimum) / n_bins
+				midpts <- minimum + ((1:n_bins)-0.5) * h
+			}
+			if (!all(c('n_bins', 'minimum', 'maximum') %in% names(target_dims)) ) {
+				stop("Target dimensins must be a vector specifying the number of\n
+						  bins ('n_bins'), as well as the limits ('minumum', 'maximum')")
+			}
+
 
 			## Calculate mean and variance:
 			nd <- .Object$newdata(stage=stage, covariates=covariates)
@@ -79,7 +101,7 @@ dlnorm_projection_factory <- function(
 						return(dlnorm(x=to, meanlog=mu, sdlog=sd))
 				},
 				mu = mu,
-				sd = sd,
+				sd = sqrt(variance),
 				MoreArgs = list(to = .Object$get_midpoints(stage=stage))
 			)
 	
@@ -92,7 +114,7 @@ dlnorm_projection_factory <- function(
 	
 	}
 
-	return(dnorm_projection)
+	return(dlnorm_projection)
 }
 
 

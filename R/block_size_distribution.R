@@ -172,14 +172,19 @@ staged_block_distribution <- setRefClass(
 			k <- which(stage == stage_names)
 			nd <- data.frame(
 				row = 1:(n_bins[k]),
-				sizes = midpoints[k],
-				covariates,
-				traits[[k]][!sapply(traits[[k]],is.function)]   ### FIXED traits.
+				sizes = midpoints[k]
 			)
+			if (length(covariates) != 0) {
+				nd <- data.frame(nd,covariates)
+			}
+			if (length(sapply(traits[[k]],is.function)) != 0) {
+				trFixed <- traits[[k]][!sapply(traits[[k]],is.function)]   ### FIXED traits.
+				nd <- data.frame(nd,trFixed)
 
-			for (f in traits[[k]][sapply(traits[[k]],is.function)]) {
-				nd <- f(nd)
-			}   ### FUNCTION value traits
+				for (f in traits[[k]][sapply(traits[[k]],is.function)]) {
+					nd <- f(nd)
+				}   ### FUNCTION value traits
+			}
 			return(nd)
 		}
 	)

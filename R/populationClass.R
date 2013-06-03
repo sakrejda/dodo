@@ -30,7 +30,8 @@ population <- setRefClass(
 													traits=traits)
 			return(.self)
 		},
-		add_model = function() {
+		add_transition = function(from=NULL, to=NULL, projection=NULL) {
+			.self$life_cycle(from=from, to=to, projection=projection)
 		},
 		step = function() {								
 		},
