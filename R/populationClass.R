@@ -5,7 +5,8 @@ population <- setRefClass(
 		life_cycle = "life_cycle",
 		env = "list",
 		projection = "block_projection",
-		distribution = "staged_block_distribution"
+		distribution = "staged_block_distribution",
+		the_eigens = "list"
 	),
 	methods = list(
 		initialize = function(											### CONSTRUCTOR
@@ -30,10 +31,24 @@ population <- setRefClass(
 													traits=traits)
 			return(.self)
 		},
-		add_transition = function(from=NULL, to=NULL, projection=NULL) {
-			.self$life_cycle(from=from, to=to, projection=projection)
+		add_transition = function(from=NULL, to=NULL, projections=NULL) {
+			.self$life_cycle$add_transition(
+				from=from, to=to, projections=projections)
 		},
-		step = function() {								
+		step = function() {							
+			make_matrix()
+			distribution <<- distribution %*% projection
+		},
+		make_matrix = function() {							
+			ft <- life_cycle$get_transitions()
+			for ( i in 1:nrow(ft)) {
+				projection[ft[i,'from'],ft[i,'to']] <<-
+					get_matrix(ft[i,'from'], ft[i,'to'], env) 
+			}
+		},
+		get_eigens = function() {
+			make_matrix()
+			the_eigens <<- eigen(projection)
 		},
 		set_env = function(e) {
 			if (is.environment(e)) {
@@ -88,7 +103,7 @@ population <- setRefClass(
 			if (is_env || is_list) {
 				set_env(e)
 				for ( i in 1:n ) {
-					if (!is.null(o) && o_type$isdir) save_populations(path=o, iteration=i)
+					if (!is.null(o) && o_type$isdir) output(path=o, iteration=i)
 					step()
 				}
 				if (!is.null(o)) save(path=o)
@@ -97,11 +112,15 @@ population <- setRefClass(
 			if (env_list || list_list) {
 				for ( i in 1:n ) {
 					set_env(e[[i]])
-					if (!is.null(o) && o_type$isdir) save_populations(path=o, iteration=i)
+					if (!is.null(o) && o_type$isdir) output(path=o, iteration=i)
 					step()
 				}
 				if (!is.null(o)) save(path=o)
 			}
+		},
+		output = function(path=NULL, iteration=NULL) {
+			projection$output(path=path, iteration=iteration)
+			distribution$output(path=path, iteration=iteration)
 		}
 	)
 )
@@ -110,22 +129,22 @@ population <- setRefClass(
 ## Binary operators have to be outside of the class (as usual)
 ################################################################################
 
-setMethod(
-	f = "+",
-	signature = signature(e1 = "population", e2 = "size_distribution"),
-	definition = function(e1, e2) {
-		e1 <- e1$copy(shallow=FALSE)
-		e2 <- population$new(life_cycle = e1$life_cycle, sub_pops = list(e2))
-		e1$immigrate(e2)
-		return(e1)
-	}
-)
-
-setMethod(
-	f = "+",
-	signature = signature(e1 = "size_distribution", e2 = "population"),
-	definition = function(e1, e2) e2 + e1
-)
-
-
+#setMethod(
+#	f = "+",
+#	signature = signature(e1 = "population", e2 = "size_distribution"),
+#	definition = function(e1, e2) {
+#		e1 <- e1$copy(shallow=FALSE)
+#		e2 <- population$new(life_cycle = e1$life_cycle, sub_pops = list(e2))
+#		e1$immigrate(e2)
+#		return(e1)
+#	}
+#)
+#
+#setMethod(
+#	f = "+",
+#	signature = signature(e1 = "size_distribution", e2 = "population"),
+#	definition = function(e1, e2) e2 + e1
+#)
+#
+#
 

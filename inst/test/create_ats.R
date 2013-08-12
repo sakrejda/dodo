@@ -40,4 +40,14 @@ pop <- new('population',
 	traits = stages 
 )
 
+egg_self_model <- new('pGLM',
+	formula = ~ 1,
+	family = binomial(link=logit),
+	coefficients = list(
+		"(Intercept)" = 2.2
+	)
+)
+egg_surv_model <- self_projection_factory(egg_self_model)
 
+pop$add_transition(from='autumn_eggs', to='winter_eggs', 
+	projections = list(survive = egg_surv_model)

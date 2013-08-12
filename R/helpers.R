@@ -79,3 +79,10 @@ as.data.frame.size_distribution <- function(x, ..., stringsAsFactors) {
   return(x)
 }
 
+as.matrix.block_projection <- function(x, ...) { return(x$A) }
+
+
+
+
+
+

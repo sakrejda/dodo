@@ -74,6 +74,9 @@ block_projection <- setRefClass(
 		plot_internal = function() {
 			pl <- visualizeBlockMatrix(.self)
 			return(pl)
+		},
+		output = function(path=NULL, iteration=NULL) {
+			stop("Not implemented.")
 		}
   )
 )

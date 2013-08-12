@@ -19,7 +19,7 @@ setRefClass(Class = "pGLM",
 			formula = ~ 1, 
 			family = gaussian(),
 			coefficients = list(intercept=0),
-			epsilon = function() {0},
+			epsilon = function(n) {rep(0,n)},
 			samp = FALSE
 		) {
 			formula 			<<- formula

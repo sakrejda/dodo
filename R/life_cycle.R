@@ -10,6 +10,7 @@ life_cycle <- setRefClass(
 		stage_names = "character",
 		j = "numeric",
 		transitions = "list",
+		transition_register = "list",
 		projections_allowed = "character"
 	),
 	methods = list(
@@ -20,7 +21,7 @@ life_cycle <- setRefClass(
 			transitions <<- sapply(
 				X = stage_names,
 				FUN = function(x) {return(list())}, USE.NAMES=TRUE)
-
+			transition_register <<- list()
 		},
 		add_transition = function(from=NULL, to=NULL, projections=NULL) {
 			if (any(!(names(projections) %in% projections_allowed))) {
@@ -40,6 +41,7 @@ life_cycle <- setRefClass(
 				stop(msg)
 			}
 			transitions[[from]][[to]][['projections']] <<- projections
+			transition_register <<- c(transition_register, list(c(from,to)))
 		},
 		reducer = function(x) {
 		  if (length(x) == 1)
@@ -51,12 +53,17 @@ life_cycle <- setRefClass(
 		    return(f(x[2:length(x)]))
 		  }
 		},
-		get_matrix = function(.Object, from, to, covariates) {
+		get_matrix = function(from, to, covariates) {
 			transitions[[from]][[to]][['matrices']] <<- lapply(
 				X = transitions[[from]][[to]][['projections']],
 				FUN = function(f, obj, stage, covariates) f(obj, stage, covariates)
 			)
 			return(reducer(transitions[[from]][[to]][['matrices']]))
+		},
+		get_transitions = function() {
+			o <- t(sapply(X = transition_register, FUN = as.matrix))
+			colnames(o) <- c('from', 'to')
+			return(o)
 		}
 	)
 )

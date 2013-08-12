@@ -131,7 +131,7 @@ self_projection_factory <- function(
 
 	self_projection <- function(.Object, stage, covariates) {
 			S <- diag(.Object$n_bins)
-			diag(S) <- model$predict(
+			diag(S) <- self_model$predict(
 				newdata = .Object$newdata(stage=stage, covariates=covariates))
 			return(S)
 	}
