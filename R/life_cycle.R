@@ -44,19 +44,21 @@ life_cycle <- setRefClass(
 			transition_register <<- c(transition_register, list(c(from,to)))
 		},
 		reducer = function(x) {
-		  if (length(x) == 1)
-		    return(x)
-		  else if (length(x) == 2)
-		    return (x[[1]] %*% x[[2]])
+			lx <- length(x)
+		  if (lx == 1)
+		    return(x[[1]])
 		  else {
-		    x[[2]] <- x[[1]] %*% x[[2]]
-		    return(f(x[2:length(x)]))
+		    x[[2]] <- x[[2]] %*% x[[1]]
+		    return(reducer(x[2:lx]))
 		  }
 		},
-		get_matrix = function(from, to, covariates) {
+		get_matrix = function(from, to, covariates, distribution) {
 			transitions[[from]][[to]][['matrices']] <<- lapply(
 				X = transitions[[from]][[to]][['projections']],
-				FUN = function(f, obj, stage, covariates) f(obj, stage, covariates)
+				FUN = function(f, obj, stage, covariates) f(obj, stage, covariates),
+				obj = distribution, 
+				stage = from,
+				covariates = covariates
 			)
 			return(reducer(transitions[[from]][[to]][['matrices']]))
 		},

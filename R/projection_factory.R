@@ -7,11 +7,12 @@
 
 dnorm_projection_factory <- function(
 	mean_model,
-	variance_model,
+	variance_model = NULL,
+	sd_model = NULL,
 	target_dims = NULL,
 	where = .GlobalEnv
 ) {
-	mean_model; variance_model; target_dims   ## Closure!
+	mean_model; variance_model; sd_model; target_dims   ## Closure!
 
 	dnorm_projection <- function(.Object, stage, covariates) {
 			if (is.null(target_dims)) { 
@@ -35,7 +36,11 @@ dnorm_projection_factory <- function(
 			## Calculate mean and variance:
 			nd <- .Object$newdata(stage=stage, covariates=covariates)
 			mu <- mean_model$predict(newdata = nd)
-			variance <- variance_model$predict(newdata = nd)
+			if (is.null(sd_model) && !is.null(variance_model)) {
+				variance <- as.numeric(variance_model$predict(newdata = nd))
+			} else if (is.null(variance_model) && !is.null(sd_model)) {
+				variance <- as.numeric(sd_model$predict(newdata = nd))^2
+			}
 	
 			## Apply:
 			S <- mapply(
@@ -61,13 +66,15 @@ dnorm_projection_factory <- function(
 
 dlnorm_projection_factory <- function(
 	mean_model,
-	variance_model,
+	variance_model = NULL,
+	sd_model = NULL,
 	target_dims = NULL,
 	where = .GlobalEnv
 ) {
-	mean_model; variance_model; target_dims   ## Closure!
+	mean_model; variance_model; sd_model; target_dims   ## Closure!
 
 	dlnorm_projection <- function(.Object, stage, covariates) {
+
 			if (is.null(target_dims)) { 
 				target_dims <- c(
 					n_bins = .Object@n_bins[.Object@stage_names == stage],
@@ -89,20 +96,22 @@ dlnorm_projection_factory <- function(
 
 			## Calculate mean and variance:
 			nd <- .Object$newdata(stage=stage, covariates=covariates)
-			mu <- mean_model$predict(newdata = nd)
-			variance <- variance_model$predict(newdata = nd)
+			mu <- as.numeric(mean_model$predict(newdata = nd))
+			if (is.null(sd_model) && !is.null(variance_model)) {
+				variance <- as.numeric(variance_model$predict(newdata = nd))
+			} else if (is.null(variance_model) && !is.null(sd_model)) {
+				variance <- as.numeric(sd_model$predict(newdata = nd))^2
+			}
+
 	
 			## Apply:
 			S <- mapply(
 				FUN = function(mu,to,sd) {
-					if (to <= mu) 
-						return(0) 
-					else 
-						return(dlnorm(x=to, meanlog=mu, sdlog=sd))
+					return(dlnorm(x=to, meanlog=mu, sdlog=sd))
 				},
 				mu = mu,
 				sd = sqrt(variance),
-				MoreArgs = list(to = .Object$get_midpoints(stage=stage))
+				MoreArgs = list(to=midpts)
 			)
 	
 			## Making sure that the transformation preserves mass:
@@ -130,7 +139,8 @@ self_projection_factory <- function(
 	self_model		## Closure!
 
 	self_projection <- function(.Object, stage, covariates) {
-			S <- diag(.Object$n_bins)
+			j <- length(.Object$get_midpoints(stage=stage))
+			S <- diag(j)
 			diag(S) <- self_model$predict(
 				newdata = .Object$newdata(stage=stage, covariates=covariates))
 			return(S)

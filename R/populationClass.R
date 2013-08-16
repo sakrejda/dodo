@@ -43,7 +43,10 @@ population <- setRefClass(
 			ft <- life_cycle$get_transitions()
 			for ( i in 1:nrow(ft)) {
 				projection[ft[i,'from'],ft[i,'to']] <<-
-					get_matrix(ft[i,'from'], ft[i,'to'], env) 
+					life_cycle$get_matrix(
+						from = ft[i,'from'], to = ft[i,'to'], 
+						covariates = as.list(env[[ ft[i,'from'] ]]), 
+						distribution = distribution) 
 			}
 		},
 		get_eigens = function() {
