@@ -248,41 +248,50 @@ squash_projection_factory <- function(
 		m <- length(midpts_orig)
 		
 		Slist <- mapply(
-			FUN = function(idx, M, x, xstar) {
-				if (xstar[idx] < min(x)) { return(rep(0,ncol(M))) }
-				if (xstar[idx] > max(x)) { return(rep(0,ncol(M))) }
-			
+			FUN = function(idx, M, x, h, xstar, hstar) {
 				row <- M[idx,]
-				xa <- max(x[x <= xstar[idx]])
-			  a <- which(x == xa)
-				if (xa == xstar[idx]) {
-					row[a] <- 1; return(row)
+
+				if ((xstar[idx]+0.5*hstar) < (min(x)-0.5*h)) return(row)
+				if ((xstar[idx]-0.5*hstar) > (max(x)+0.5*h)) return(row)
+				print(idx)
+
+				Qi <- which( (x-0.5*h < xstar[idx]-0.5*hstar) &
+										  (x+0.5*h > xstar[idx]+0.5*hstar) )
+				if (length(Qi) >= 1) {
+					row[Qi] <- hstar / h
+					return(row)
 				}
 
-				xb <- min(x[x >= xstar[idx]])
-				b <- which(x == xb)
-				if (xb == xstar[idx]) {
-					row[b] <- 1; return(row)
-				}
-				
-				k <- (xstar[idx] - xa)/(xb - xa)
-				print(k)
-				row[a] <- 1-k
-				row[b] <- k
+				Q <- which( (x-.5*h >= xstar[idx]-.5*hstar) & 
+									  (x+.5*h <= xstar[idx]+.5*hstar))
+				print(Q)
+				if (length(Q) >=1) row[Q] <- 1
 
+				Qm <- which( (x-0.5*h < xstar[idx]-0.5*hstar) &
+										 (x+0.5*h > xstar[idx]-0.5*hstar) )
+				print(Qm)
+				if (length(Qm) >=1) row[Qm] <- 
+					((x[Qm]+.5*h) - (xstar[idx]-.5*hstar)) / h
+
+				Qp <- which( (x-0.5*h < xstar[idx]+0.5*hstar) &
+										 (x+0.5*h > xstar[idx]+0.5*hstar) )
+				print(Qp)
+				if (length(Qp) >=1) row[Qp] <- 
+					((xstar[idx]+.5*hstar) - (x[Qp]-.5*h)) / h
+				cat("\n")
 				return(row)
 			},
 			idx   = seq(1,n),
 			MoreArgs = list(
 				M     = matrix(data = 0, nrow=n, ncol=m),
+				h     = h_orig,
 				x     = midpts_orig,
+				hstar = h,
 				xstar = midpts
 			),
 			SIMPLIFY = FALSE
 		)
 		S <- do.call(what=rbind, args = Slist)
-		S <- S / (h / h_orig)
-
 		return(S)
 	}
 
