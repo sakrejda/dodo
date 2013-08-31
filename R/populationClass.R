@@ -42,11 +42,24 @@ population <- setRefClass(
 		make_matrix = function() {							
 			ft <- life_cycle$get_transitions()
 			for ( i in 1:nrow(ft)) {
-				projection[ft[i,'from'],ft[i,'to']] <<-
-					life_cycle$get_matrix(
+				lhs_dim <- dim(projection[ft[i,'from'],ft[i,'to']])
+				rhs <- life_cycle$get_matrix(
 						from = ft[i,'from'], to = ft[i,'to'], 
 						covariates = as.list(env[[ ft[i,'from'] ]]), 
 						distribution = distribution) 
+				if (all(lhs_dim == dim(rhs))) {
+					projection[ft[i,'from'],ft[i,'to']] <<- rhs
+				} else {
+					msg <- paste(
+						"Dimensions of projection from '", 
+						ft[i,'from'], "' to '", ft[i,'to'], "'",
+						"\n\tshould be ", lhs_dim[1], " row(s), and ", lhs_dim[2], " column(s).",
+						"\n\tNow they are ", dim(rhs)[1], " row(s), and ", dim(rhs)[2], " column(s).",
+						"\n\tPlease check your models for this transition.", 
+						sep=''
+					)
+					stop(msg)
+				}
 			}
 		},
 		get_eigens = function() {

@@ -172,7 +172,7 @@ staged_block_distribution <- setRefClass(
 			k <- which(stage == stage_names)
 			nd <- data.frame(
 				row = 1:(n_bins[k]),
-				sizes = midpoints[k]
+				sizes = midpoints[start_index[k]:stop_index[k]]
 			)
 			if (length(covariates) != 0) {
 				nd <- data.frame(nd,covariates)

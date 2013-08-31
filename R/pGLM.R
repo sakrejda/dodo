@@ -26,9 +26,13 @@ setRefClass(Class = "pGLM",
 			family 				<<- family
 
 			nc <- length(coefficients)
-			coef_tmp <- matrix(unlist(coefficients), nrow=nc, byrow=TRUE)
-			rownames(coef_tmp) <- names(coefficients)
-			coefficients 	<<- coef_tmp
+			if (length(coefficients) > 0 ) {
+				coef_tmp <- matrix(unlist(coefficients), nrow=nc, byrow=TRUE)
+				rownames(coef_tmp) <- names(coefficients)
+				coefficients 	<<- coef_tmp
+			} else {
+				coefficients <<- matrix()
+			}
 
 			epsilon 			<<- epsilon
 			samp 					<<- samp

@@ -58,7 +58,7 @@ life_cycle <- setRefClass(
 				FUN = function(f, obj, stage, covariates) f(obj, stage, covariates),
 				obj = distribution, 
 				stage = from,
-				covariates = covariates
+				covariates = as.list(covariates[[from]])
 			)
 			return(reducer(transitions[[from]][[to]][['matrices']]))
 		},
