@@ -67,19 +67,7 @@ population <- setRefClass(
 			the_eigens <<- eigen(projection)
 		},
 		set_env = function(e) {
-			if (is.environment(e)) {
-				o <- replicate(n=length(env), expr=e)
-				names(o) <- names(env)
-				env <<- o
-				return(env)
-			} else if (is.list(e)) {
-				## Single element list:
-				if (!any(sapply(e,is.list))) {
-					o <- replicate(n=length(env), expr=list.2.environment(e))
-					names(o) <- names(env)
-					env <<- o
-					return(env)
-				}
+			if (is.list(e)) {
 				all_elements <- !any(is.na(match(x=names(e), table=names(env))))
 				if (!all_elements) { 
 					stop("Some elements of 'env' not defined in argument 'e'.")
@@ -100,6 +88,8 @@ population <- setRefClass(
 					env <<- e
 					return(env)
 				}
+			} else {
+				stop("Argument 'e' must be a list of environments.")
 			}
 		},
 		run = function(e = new.env(), n = 1, o = NULL) {

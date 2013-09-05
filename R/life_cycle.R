@@ -29,6 +29,16 @@ life_cycle <- setRefClass(
 										 paste(projections_allowed, collapse="\n"), sep='')
 				stop(msg)
 			}
+			if (!(from %in% stage_names)) {
+				msg <- paste("Stage ", from, " unknown.  All stages must be",
+										 " defined at object initialization.\n", sep='')
+				stop(msg)
+			}
+			if (!(to %in% stage_names)) {
+				msg <- paste("Stage ", to, " unknown.  All stages must be",
+										 " defined at object initialization.\n", sep='')
+				stop(msg)
+			}
 			f <- function(p) all(formalArgs(p) %in% c('.Object', 'stage', 'covariates')) 
 			test <- sapply(X=projections, FUN = f)
 			if (!all(test) || (length(all(test)) != 1)) {
@@ -58,7 +68,7 @@ life_cycle <- setRefClass(
 				FUN = function(f, obj, stage, covariates) f(obj, stage, covariates),
 				obj = distribution, 
 				stage = from,
-				covariates = as.list(covariates[[from]])
+				covariates = as.list(covariates)
 			)
 			return(reducer(transitions[[from]][[to]][['matrices']]))
 		},

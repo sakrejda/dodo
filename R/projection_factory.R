@@ -17,9 +17,9 @@ dnorm_projection_factory <- function(
 	dnorm_projection <- function(.Object, stage, covariates) {
 			if (is.null(target_dims)) { 
 				target_dims <- c(
-					n_bins = .Object@n_bins[.Object@stage_names == stage],
-					minimum = .Object@minima[.Object@stage_names == stage],
-					maximum = .Object@maxima[.Object@stage_names == stage])
+					n_bins = .Object$n_bins[.Object$stage_names == stage],
+					minimum = .Object$minima[.Object$stage_names == stage],
+					maximum = .Object$maxima[.Object$stage_names == stage])
 					midpts = .Object$get_midpoints(stage=stage)
 			} else {
 				n_bins <- target_dims['n_bins']
@@ -77,9 +77,9 @@ dlnorm_projection_factory <- function(
 
 			if (is.null(target_dims)) { 
 				target_dims <- c(
-					n_bins = .Object@n_bins[.Object@stage_names == stage],
-					minimum = .Object@minima[.Object@stage_names == stage],
-					maximum = .Object@maxima[.Object@stage_names == stage])
+					n_bins = .Object$n_bins[.Object$stage_names == stage],
+					minimum = .Object$minima[.Object$stage_names == stage],
+					maximum = .Object$maxima[.Object$stage_names == stage])
 					midpts = .Object$get_midpoints(stage=stage)
 			} else {
 				n_bins <- target_dims['n_bins']
@@ -138,9 +138,9 @@ offset_dlnorm_projection_factory <- function(
 
 			if (is.null(target_dims)) { 
 				target_dims <- c(
-					n_bins = .Object@n_bins[.Object@stage_names == stage],
-					minimum = .Object@minima[.Object@stage_names == stage],
-					maximum = .Object@maxima[.Object@stage_names == stage])
+					n_bins = .Object$n_bins[.Object$stage_names == stage],
+					minimum = .Object$minima[.Object$stage_names == stage],
+					maximum = .Object$maxima[.Object$stage_names == stage])
 					midpts = .Object$get_midpoints(stage=stage)[,1]
 			} else {
 				n_bins <- target_dims['n_bins']
@@ -221,18 +221,18 @@ squash_projection_factory <- function(
 	target_dims
 
 	squash_projection <- function(.Object, stage, covariates) {
-		n_bins_orig = .Object@n_bins[.Object@stage_names == stage]
-		minimum_orig = .Object@minima[.Object@stage_names == stage]
-		maximum_orig = .Object@maxima[.Object@stage_names == stage]
-		h_orig = (maximum_orig - minimum_orig) / n_bins
-		midpts_orig = .Object$get_midpoints(stage=stage)
+		n_bins_orig = .Object$n_bins[.Object$stage_names == stage]
+		minimum_orig = .Object$minima[.Object$stage_names == stage]
+		maximum_orig = .Object$maxima[.Object$stage_names == stage]
+		h_orig = (maximum_orig - minimum_orig) / n_bins_orig
+		midpts_orig = .Object$get_midpoints(stage=stage)[,1]
 
 		if (is.null(target_dims)) { 
-			n_bins = .Object@n_bins[.Object@stage_names == stage]
-			minimum = .Object@minima[.Object@stage_names == stage]
-			maximum = .Object@maxima[.Object@stage_names == stage]
+			n_bins = .Object$n_bins[.Object$stage_names == stage]
+			minimum = .Object$minima[.Object$stage_names == stage]
+			maximum = .Object$maxima[.Object$stage_names == stage]
 			h <- (maximum - minimum) / n_bins
-			midpts = .Object$get_midpoints(stage=stage)
+			midpts = .Object$get_midpoints(stage=stage)[,1]
 		} else {
 			if (!all(c('n_bins', 'minimum', 'maximum') %in% names(target_dims)) ) {
 				stop("Target dimensins must be a vector specifying the number of\n
@@ -253,30 +253,26 @@ squash_projection_factory <- function(
 
 				if ((xstar[idx]+0.5*hstar) < (min(x)-0.5*h)) return(row)
 				if ((xstar[idx]-0.5*hstar) > (max(x)+0.5*h)) return(row)
-				print(idx)
 
 				Qi <- which( (x-0.5*h < xstar[idx]-0.5*hstar) &
 										  (x+0.5*h > xstar[idx]+0.5*hstar) )
-				if (length(Qi) >= 1) {
+				if (length(Qi) == 1) {
 					row[Qi] <- hstar / h
 					return(row)
 				}
 
 				Q <- which( (x-.5*h >= xstar[idx]-.5*hstar) & 
 									  (x+.5*h <= xstar[idx]+.5*hstar))
-				print(Q)
 				if (length(Q) >=1) row[Q] <- 1
 
 				Qm <- which( (x-0.5*h < xstar[idx]-0.5*hstar) &
 										 (x+0.5*h > xstar[idx]-0.5*hstar) )
-				print(Qm)
-				if (length(Qm) >=1) row[Qm] <- 
+				if (length(Qm) ==1) row[Qm] <- 
 					((x[Qm]+.5*h) - (xstar[idx]-.5*hstar)) / h
 
 				Qp <- which( (x-0.5*h < xstar[idx]+0.5*hstar) &
 										 (x+0.5*h > xstar[idx]+0.5*hstar) )
-				print(Qp)
-				if (length(Qp) >=1) row[Qp] <- 
+				if (length(Qp) ==1) row[Qp] <- 
 					((xstar[idx]+.5*hstar) - (x[Qp]-.5*h)) / h
 				cat("\n")
 				return(row)
