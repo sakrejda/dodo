@@ -2,13 +2,13 @@ library(dodo)
 data('estimates-ATS-smolt-M4')
 data('stages.ats')
 
-stages.ats$season <- factor(stages.ats$season)
+#stages.ats$season <- factor(stages.ats$season)
 
-stages.ats <- stages.ats[ !(stages.ats$stage %in% 
-	c('four_summer_parr','four_autumn_parr','four_winter_parr',
-		'three_autumn_sea2', 'three_autumn_sea3', 'three_autumn_sea4',
-		'three_winter_sea2', 'three_winter_sea3', 'three_winter_sea4')),]
-mod <- !is.na(stages.ats$ageInSamples)
+#stages.ats <- stages.ats[ !(stages.ats$stage %in% 
+#	c('four_summer_parr','four_autumn_parr','four_winter_parr',
+#		'three_autumn_sea2', 'three_autumn_sea3', 'three_autumn_sea4',
+#		'three_winter_sea2', 'three_winter_sea3', 'three_winter_sea4')),]
+#mod <- !is.na(stages.ats$ageInSamples)
 
 #stages.ats$ageInSamples <- factor(stages.ats$ageInSamples)
 
@@ -60,7 +60,9 @@ pop <- new('population',
 	bins = stages.ats[['n_bins']],
 	minima = stages.ats[['minima']],
 	maxima = stages.ats[['maxima']],
-	projections = c('survive', 'stretch', 'squash', 'smolt', 'grow'),
+	padding = stages.ats[['pad']],
+	projections = c('survive', 'stretch', 'squash', 'smolt', 'grow',
+									'bound_source', 'bound_target'),
 	traits = stages 
 )
 
@@ -129,14 +131,22 @@ fry_var_size_model <- new('pGLM',
 recruit_size_model <- dnorm_projection_factory(
 	mean_model = fry_mean_size_model,
 	variance_model = fry_var_size_model,
-	target_dims = c(n_bins = 24, minimum = 49.9, maximum = 73.9)
+	target_dims = c(
+		n_bins = stages.ats[['n_bins']][4], 
+		minimum = stages.ats[['minima']][4], 
+		maximum = stages.ats[['maxima']][4]
+	)
 )
+
+bound_age1 <- bound_projection_factory(m=48, pad=5)
 
 ################################################################################
 pop$add_transition(from='spring_fry', to='zero_summer_parr',
 	projection = list( 
 		survive = fry_self_model, 
-		grow = recruit_size_model)
+		grow = recruit_size_model,
+		bound_target = bound_age1
+	)
 )
 ################################################################################
 
@@ -256,7 +266,18 @@ juvenile_survival_model <- self_projection_factory(juvenile_self_model)
 
 ################################################################################
 juvenile_growth_models <- list()
+bound_sources <- list()
+bound_targets <- list()
 for ( i in 1:15) {
+	#bound_age1 <- bound_projection_factory(m=24, pad=3)
+	bound_sources[[i]] <- bound_projection_factory(
+		m=stages.ats[['n_bins']][i+3], 
+		pad=stages.ats[['pad']][i+3]
+	)
+	bound_targets[[i]] <- bound_projection_factory(
+		m=stages.ats[['n_bins']][i+4], 
+		pad=stages.ats[['pad']][i+4]
+	)
 	juvenile_growth_models[[i]] <- offset_dlnorm_projection_factory(
 		mean_model = juvenile_growth_mu_model,
 		sd_model = juvenile_growth_sd_model,
@@ -268,8 +289,10 @@ for ( i in 1:15) {
 	)
 	pop$add_transition(from=stages.ats[['stage']][i+3], to=stages.ats[['stage']][i+4],
 		projection = list(
+			bound_source = bound_sources[[i]],
 			survive = juvenile_survival_model, 
-			grow = juvenile_growth_models[[i]]
+			grow = juvenile_growth_models[[i]],
+			bound_target = bound_targets[[i]]
 		)
 	)
 }
@@ -489,73 +512,92 @@ for ( i in stages.ats$stage[4:19]) {
 Reig <- eigen(  pop$projection$A )
 Leig <- eigen(t(pop$projection$A))
 
+lambda <- function(pop, vectors=TRUE) {
+	return(eigen(pop$projection$A, only.values=!vectors)$values[1])
+}
+
 # Plots of decaying magnitude of real and
 # imaginary parts of eigenvalues.
 plot(Re(Reig$values[1:100]))
 plot(Im(Reig$values[1:100]))
 
 # Dominant right eigenvector:
+#right_ev <- (-Re(Reig$vectors[,1]))
+#stages <- vector(mode='character', length=length(right_ev))
+#for ( i in 1:length(pop$distribution$stage_names)) {
+#	stages[pop$distribution$start_index[i]:pop$distribution$stop_index[i]] <- 
+#		pop$distribution$stage_names[i]
+#}
+#stage_distribution <- aggregate(
+#	x=right_ev, 
+#	by=list(stage=stages), FUN=sum)
+#sortifying <- sapply(
+#	X = stage_distribution$stage,
+#	FUN = function(stage) {
+#		return(which(stage == pop$distribution$stage_names))
+#	},
+#	USE.NAMES=FALSE
+#)
+#stage_distribution$sort <- sortifying
+#stage_distribution <- stage_distribution[order(stage_distribution$sort),]
+#stage_distribution$stage_factor <- 
+#	factor(x=stage_distribution$stage, levels=rev(stage_distribution$stage))
+#ggplot(data=stage_distribution, aes(x=x, y=stage_factor)) + geom_point()
+
+#sortifying <- sapply(
+#	X = stage_distribution$stage,
+#	FUN = function(stage) {
+#		return(which(stage == pop$distribution$stage_names))
+#	},
+#	USE.NAMES=FALSE
+#)
+#stage_distribution$sort <- sortifying
+#stage_distribution <- stage_distribution[order(stage_distribution$sort),]
+#stage_distribution$stage_factor <- 
+#	factor(x=stage_distribution$stage, levels=rev(stage_distribution$stage))
+#
+#stage_distribution_pl <- ggplot(
+#	data=stage_distribution, 
+#	aes(x=x, y=stage_factor)
+#) + geom_point() +
+#		scale_x_log10()
+#
+
+# Reprductive value:
+rv <- -Re(Leig$vectors[,1])
+rv[24:27] <- 10^-10
+rv <- rv/sum(rv)
+
+
+
+# Stable stage distribution:
 right_ev <- (-Re(Reig$vectors[,1]))
 stages <- vector(mode='character', length=length(right_ev))
 for ( i in 1:length(pop$distribution$stage_names)) {
 	stages[pop$distribution$start_index[i]:pop$distribution$stop_index[i]] <- 
 		pop$distribution$stage_names[i]
 }
-stage_distribution <- aggregate(
-	x=right_ev, 
-	by=list(stage=stages), FUN=sum)
-sortifying <- sapply(
-	X = stage_distribution$stage,
-	FUN = function(stage) {
-		return(which(stage == pop$distribution$stage_names))
-	},
-	USE.NAMES=FALSE
+
+
+outcomes <- data.frame(
+	stage=stages, 
+	stage_f=factor(x=stages, levels=(pop$distribution$stage_names)),
+	density=-right_ev,
+	relden = right_ev/sum(right_ev),
+	size=pop$distribution$midpoints[,1],
+	value=rv
 )
-stage_distribution$sort <- sortifying
-stage_distribution <- stage_distribution[order(stage_distribution$sort),]
-stage_distribution$stage_factor <- 
-	factor(x=stage_distribution$stage, levels=rev(stage_distribution$stage))
-ggplot(data=stage_distribution, aes(x=x, y=stage_factor)) + geom_point()
-
-# Stable stage distribution
-right_ev <- (-Re(Reig$vectors[,1]))
-stages <- vector(mode='character', length=length(right_ev))
-for ( i in 1:length(pop$distribution$stage_names)) {
-	stages[pop$distribution$start_index[i]:pop$distribution$stop_index[i]] <- 
-		pop$distribution$stage_names[i]
-}
-stage_distribution <- aggregate(
-	x=right_ev, 
-	by=list(stage=stages), FUN=sum)
-sortifying <- sapply(
-	X = stage_distribution$stage,
-	FUN = function(stage) {
-		return(which(stage == pop$distribution$stage_names))
-	},
-	USE.NAMES=FALSE
-)
-stage_distribution$sort <- sortifying
-stage_distribution <- stage_distribution[order(stage_distribution$sort),]
-stage_distribution$stage_factor <- 
-	factor(x=stage_distribution$stage, levels=rev(stage_distribution$stage))
-
-stage_distribution_pl <- ggplot(
-	data=stage_distribution, 
-	aes(x=x, y=stage_factor)
-) + geom_point() +
-		scale_x_log10()
-
 
 size_distributions <- by(
-	data = data.frame(stage=stages, density=right_ev,
-										size=pop$distribution$midpoints[,1]),
+	data = outcomes,
 	INDICES = list(stage=stages),
 	FUN = function(dat) {
 		o <- data.frame(
 			stage = unique(dat$stage),
 			total = sum(dat$density),
 			mode = dat$size[dat$density == max(dat$density)],
-			sd = 1
+			sd = 1,
+			total_value = sum(dat$value)
 		)
 		return(o)
 	},
@@ -564,6 +606,78 @@ size_distributions <- by(
 size_distributions <- do.call(what=rbind, args=size_distributions)
 rownames(size_distributions) <- NULL
 size_distributions$proportion <- size_distributions$total / sum(size_distributions$total)
+
+sortifying <- sapply(
+	X = size_distributions$stage,
+	FUN = function(stage) {
+		return(which(stage == pop$distribution$stage_names))
+	},
+	USE.NAMES=FALSE
+)
+size_distributions$sort <- sortifying
+size_distributions <- size_distributions[order(size_distributions$sort),]
+size_distributions$stage_factor <- 
+	factor(x=size_distributions$stage, levels=rev(size_distributions$stage))
+
+size_distributions$smolting_age <- NA
+for ( i in c('2','3','4')) {
+	size_distributions$smolting_age[grepl(x=size_distributions$stage, pattern=i)] <- i
+}
+size_distributions$smolting_age <-
+	factor(size_distributions$smolting_age)
+
+size_distribution_pl <- ggplot(
+	data=size_distributions, 
+	aes(x=proportion, y=stage_factor, colour=smolting_age)
+) + geom_point() +
+		scale_x_log10()
+
+reproductive_value_pl <- ggplot(
+	data=size_distributions, 
+	aes(x=total_value, y=stage_factor, colour=smolting_age)
+) + geom_point() +
+		scale_x_log10()
+
+sized_stages <- stages.ats$stage[
+	stages.ats$stage %in% stages.ats$stage[stages.ats$n_bins > 1]
+]
+
+stage_mode_pl <- ggplot(
+	data = size_distributions[size_distributions$stage %in% sized_stages,],
+	aes(x=mode, y=stage_factor)
+) + geom_point()
+
+
+size_spec <- outcomes[outcomes$stage %in% stages.ats$stage[stages.ats$n_bins > 1],]
+pl <- ggplot(
+	data=size_spec,
+	aes(x=size, y=relden, colour=stage_f)
+) + geom_path() +
+		facet_wrap( ~ stage_f, scales = 'free_y') +
+#		scale_y_log10() +
+		xlab("Size (mm)") + 
+		ylab("Proportion (log10)")
+
+	
+pl <- ggplot(
+	data=size_spec,
+	aes(x=size, y=value, colour=stage_f)
+) + geom_path() +
+		facet_wrap( ~ stage_f, scales = 'free_y') +
+#		scale_y_log10() +
+		xlab("Size (mm)") + 
+		ylab("Reproductive value")
+
+
+# Sensitivity:
+nonzeros <- which(pop$projection$A != 0)
+sensitivity <- vector(mode='numeric', length=length(nonzeros))
+
+
+# 1) Condition number
+# 2) Ask Ron about how to improve the condition number?
+# 3) print(size_distribution_pl)
+# 4) print(reproductive_value_pl)
 
 
 

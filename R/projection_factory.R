@@ -298,4 +298,22 @@ stretch_projection_factory <- squash_projection_factory
 
 
 
+bound_projection_factory <- function(
+	m = NULL,
+	pad = 0,
+	where = .GlobalEnv
+) {
+	m; pad;
+
+	bound_projection <- function(.Object, stage, covariates) {
+		di <- rep(1,m)
+		di[1:pad] <- 0
+		di[(m-pad+1):m] <- 0
+		S <- diag(di)
+		return(S)
+	}
+
+	return(bound_projection)
+
+}
 

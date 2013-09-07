@@ -14,6 +14,7 @@ population <- setRefClass(
 			bins = NULL,
 			minima = NULL,
 			maxima = NULL,
+			padding = NULL,
 			projections = NULL,
 			traits = NULL
 		) {
