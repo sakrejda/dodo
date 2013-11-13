@@ -36,6 +36,22 @@ population <- setRefClass(
 			.self$life_cycle$add_transition(
 				from=from, to=to, projections=projections)
 		},
+		get_transitions(from=NULL, to=NULL) {
+			reg <- do.call(what=rbind, args=pop$life_cycle$transition_register)
+			names(reg) <- c('from','to')
+
+			if ( is.null(from) &&  is.null(to)) {
+				return(reg)
+			} else if (!is.null(from) && !is.null(to)) {
+				return(reg[reg[['from']] == from & reg[['to']] == to,])
+			} else if (!is.null(from) &&  is.null(to)) {
+				return(reg[reg[['from']] == from,])
+			} else if ( is.null(from) && !is.null(to)) {
+				return(reg[                        reg[['to']] == to,])
+			} else {
+				stop("Nonsensical 'from/to' args.")
+			}
+		}
 		step = function() {							
 			make_matrix()
 			distribution <<- distribution %*% projection

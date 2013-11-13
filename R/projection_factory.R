@@ -53,9 +53,9 @@ dnorm_projection_factory <- function(
 			)
 	
 			## Making sure that the transformation preserves mass:
-			S <- apply(
-				X=S, MARGIN=2, 
-				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
+#			S <- apply(
+#				X=S, MARGIN=2, 
+#				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 	
 			return(S)
 	
@@ -113,9 +113,9 @@ dlnorm_projection_factory <- function(
 			)
 	
 			## Making sure that the transformation preserves mass:
-			S <- apply(
-				X=S, MARGIN=2, 
-				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
+#			S <- apply(
+#				X=S, MARGIN=2, 
+#				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 	
 			return(S)
 	
@@ -175,9 +175,9 @@ offset_dlnorm_projection_factory <- function(
 			)
 	
 			## Making sure that the transformation preserves mass:
-			S <- apply(
-				X=S, MARGIN=2, 
-				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
+#			S <- apply(
+#				X=S, MARGIN=2, 
+#				FUN=function(x) {if(sum(x) != 0) x/sum(x) else x})
 	
 			return(S)
 	

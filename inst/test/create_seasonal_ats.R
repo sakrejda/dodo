@@ -1,6 +1,6 @@
 library(dodo)
 data('estimates-ATS-smolt-M4')
-#data('stages.ats')
+data('stages.ats')
 
 #stages.ats$season <- factor(stages.ats$season)
 
@@ -55,16 +55,21 @@ stages <- lapply( X=stages.ats[['stage']],
 names(stages) <- stages.ats[['stage']]
 
 
-pop <- new('population', 
-	stages = stages.ats[['stage']],
-	bins = stages.ats[['n_bins']],
-	minima = stages.ats[['minima']],
-	maxima = stages.ats[['maxima']],
-	padding = stages.ats[['pad']],
-	projections = c('survive', 'stretch', 'squash', 'smolt', 'grow',
-									'bound_source', 'bound_target'),
-	traits = stages 
-)
+seasonal.stages.ats <- split(x=stages.ats, f=stages.ats[['season']])
+
+pops <- list()
+for ( nom in names(seasonal.stages.ats)) {
+	pops[[nom]] <- new('population', 
+		stages = seasonal.stages.ats[[nom]][['stage']],
+		bins = seasonal.stages.ats[[nom]][['n_bins']],
+		minima = seasonal.stages.ats[[nom]][['minima']],
+		maxima = seasonal.stages.ats[[nom]][['maxima']],
+		padding = seasonal.stages.ats[[nom]][['pad']],
+		projections = c('survive', 'stretch', 'squash', 'smolt', 'grow',
+										'bound_source', 'bound_target'),
+		traits = stages 
+	)
+}
 
 ## AS A TEST:
 flowMeans <- c(spring=28,summer=11,autumn=12,winter=26)
